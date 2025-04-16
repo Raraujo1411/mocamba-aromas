@@ -117,12 +117,11 @@
       <label for="local">Local:</label>
       <input type="text" id="local" />
 
-      <button type="button" id="adicionarBtn">Adicionar</button>
-      <button type="button" id="removerBtn">Remover</button>
+      <div style="display: flex; gap: 10px;">
+        <button type="button" id="adicionarBtn" style="flex: 1;">Adicionar</button>
+        <button type="button" id="removerBtn" style="flex: 1;">Remover</button>
+      </div>
     </form>
-
-    <button id="zerarEstoqueBtn" style="background:red">Zerar Estoque</button>
-    <button id="zerarVendasBtn" style="background:darkred">Zerar Vendas</button>
 
     <h2>Estoque Atual</h2>
     <table>
@@ -158,186 +157,188 @@
         </tr>
       </thead>
       <tbody id="tabelaVendas"></tbody>
+      <tfoot>
+        <tr style="font-weight:bold; background:#f0f0f0">
+          <td colspan="3">Total</td>
+          <td id="totalQtdVendas"></td>
+          <td id="totalValVendas"></td>
+        </tr>
+      </tfoot>
     </table>
+
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button id="zerarEstoqueBtn" style="background:red; flex: 1; max-width: 200px;">Zerar Estoque</button>
+      <button id="zerarVendasBtn" style="background:darkred; flex: 1; max-width: 200px;">Zerar Vendas</button>
+    </div>
+
   </div>
+<script>
+const webAppURL = "https://script.google.com/macros/s/AKfycbyWq5Cn6RcdF8kkqRfZCOIiybzTTj6Na1QlkYz4tu_nRpL67JfGSDx6vIE50FQCDZ44/exec";
+let estoque = JSON.parse(localStorage.getItem("estoqueVelas")) || {};
+let vendas = JSON.parse(localStorage.getItem("vendasVelas")) || [];
 
-  <script>
-    const webAppURL = "https://script.google.com/macros/s/AKfycbyWq5Cn6RcdF8kkqRfZCOIiybzTTj6Na1QlkYz4tu_nRpL67JfGSDx6vIE50FQCDZ44/exec";
-    let estoque = {};
-    let vendas = [];
+function registrarVenda() {
+  const aroma = document.getElementById("vendaAroma").value;
+  const peso = parseInt(document.getElementById("vendaPeso").value);
+  const quantidade = parseInt(document.getElementById("vendaQuantidade").value);
+  if (!quantidade || quantidade <= 0) return alert("Quantidade não informada");
 
-    function registrarVenda() {
-      const aroma = document.getElementById("vendaAroma").value;
-      const peso = parseInt(document.getElementById("vendaPeso").value);
-      const quantidade = parseInt(document.getElementById("vendaQuantidade").value);
-      const valorUnit = peso === 160 ? 65 : 45;
-      const valorTotal = valorUnit * quantidade;
+  const valorUnitario = peso === 160 ? 65 : 45;
+  const valorTotal = valorUnitario * quantidade;
 
-      let chave = Object.keys(estoque).find(k => k.startsWith(`${aroma}_${peso}_`));
-      if (!chave) {
-        const local = "GERACAO VITAL";
-        chave = `${aroma}_${peso}_${local}`;
-        estoque[chave] = 0;
-      }
+  const chaves = Object.keys(estoque).filter(k => k.startsWith(`${aroma}_${peso}_`));
+  const chave = chaves[0] || `${aroma}_${peso}_GERACAO VITAL`;
+  estoque[chave] = (estoque[chave] || 0) - quantidade;
 
-      estoque[chave] -= quantidade;
+  const data = new Date().toLocaleDateString("pt-BR");
+  vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
+  if (vendas.length > 100) vendas.pop();
 
-      const data = new Date().toLocaleDateString("pt-BR");
-      vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
+  localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
+  localStorage.setItem("vendasVelas", JSON.stringify(vendas));
+  atualizarTabela();
+  atualizarVendas();
+  salvarEstoqueNaNuvem();
+  salvarVendasNaNuvem();
+}
 
+function alterarEstoque(adicionar) {
+  const aroma = document.getElementById("aroma").value;
+  const peso = document.getElementById("peso").value;
+  const quantidade = parseInt(document.getElementById("quantidade").value);
+  let local = document.getElementById("local").value.trim() || "GERACAO VITAL";
+  if (!quantidade || quantidade <= 0) return alert("Quantidade não informada");
+
+  const chave = `${aroma}_${peso}_${local}`;
+  estoque[chave] = estoque[chave] || 0;
+  estoque[chave] = adicionar ? estoque[chave] + quantidade : estoque[chave] - quantidade;
+
+  localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
+  atualizarTabela();
+  salvarEstoqueNaNuvem();
+}
+
+function zerarEstoque() {
+  const senha = prompt("Digite a senha para zerar o estoque:");
+  if (senha !== "1234") return alert("Senha incorreta.");
+  if (confirm("Tem certeza que deseja zerar o estoque?")) {
+    estoque = {};
+    localStorage.removeItem("estoqueVelas");
+    atualizarTabela();
+    salvarEstoqueNaNuvem();
+  }
+}
+
+function zerarVendas() {
+  const senha = prompt("Digite a senha para zerar as vendas:");
+  if (senha !== "1234") return alert("Senha incorreta.");
+  if (confirm("Tem certeza que deseja apagar todas as vendas?")) {
+    vendas = [];
+    localStorage.removeItem("vendasVelas");
+    atualizarVendas();
+    salvarVendasNaNuvem();
+  }
+}
+
+function atualizarTabela() {
+  const tbody = document.getElementById("tabelaEstoque");
+  tbody.innerHTML = "";
+  let totalQtd = 0;
+  let totalVal = 0;
+  Object.entries(estoque).forEach(([chave, qtd]) => {
+    const [aroma, peso, local] = chave.split("_");
+    const valor = qtd * (parseInt(peso) === 160 ? 65 : 45);
+    totalQtd += qtd;
+    totalVal += valor;
+    tbody.innerHTML += `<tr class="${qtd < 0 ? 'negativo' : ''}">
+      <td>${aroma}</td>
+      <td>${peso}g</td>
+      <td>${qtd}</td>
+      <td>R$ ${valor.toFixed(2)}</td>
+      <td>${local}</td>
+    </tr>`;
+  });
+  document.getElementById("totalQtd").textContent = totalQtd;
+  document.getElementById("totalVal").textContent = "R$ " + totalVal.toFixed(2);
+}
+
+function atualizarVendas() {
+  const tbody = document.getElementById("tabelaVendas");
+  tbody.innerHTML = "";
+  let totalQtd = 0;
+  let totalVal = 0;
+  vendas.forEach(v => {
+    totalQtd += v.quantidade;
+    totalVal += v.valorTotal;
+    tbody.innerHTML += `<tr>
+      <td>${v.data}</td>
+      <td>${v.aroma}</td>
+      <td>${v.peso}g</td>
+      <td>${v.quantidade}</td>
+      <td>R$ ${v.valorTotal.toFixed(2)}</td>
+    </tr>`;
+  });
+  document.getElementById("totalQtdVendas").textContent = totalQtd;
+  document.getElementById("totalValVendas").textContent = "R$ " + totalVal.toFixed(2);
+}
+
+function salvarEstoqueNaNuvem() {
+  const dados = Object.entries(estoque).map(([k, qtd]) => {
+    const [aroma, peso, local] = k.split("_");
+    return [aroma, peso, local, qtd];
+  });
+  fetch(webAppURL + "?tipo=Estoque", {
+    method: "POST",
+    body: JSON.stringify(dados)
+  });
+}
+
+function salvarVendasNaNuvem() {
+  const dados = vendas.map(v => [v.data, v.aroma, v.peso, v.quantidade, v.valorTotal]);
+  fetch(webAppURL + "?tipo=Vendas", {
+    method: "POST",
+    body: JSON.stringify(dados)
+  });
+}
+
+function carregarEstoqueDaNuvem() {
+  fetch(webAppURL + "?tipo=Estoque")
+    .then(res => res.json())
+    .then(data => {
+      estoque = {};
+      data.forEach(([aroma, peso, local, qtd]) => {
+        const chave = `${aroma}_${peso}_${local}`;
+        estoque[chave] = parseInt(qtd);
+      });
       localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
-      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
-
       atualizarTabela();
-      atualizarVendas();
-      salvarEstoqueNaNuvem();
-      salvarVendasNaNuvem();
-    }
-
-    function alterarEstoque(adicionar) {
-      const aroma = document.getElementById("aroma").value;
-      const peso = document.getElementById("peso").value;
-      const quantidadeInput = document.getElementById("quantidade").value;
-      let local = document.getElementById("local").value.trim();
-      if (!local) local = "GERACAO VITAL";
-      if (!quantidadeInput || isNaN(quantidadeInput) || parseInt(quantidadeInput) <= 0) {
-        alert("Quantidade não informada.");
-        return;
-      }
-      const quantidade = parseInt(quantidadeInput);
-      const chave = `${aroma}_${peso}_${local}`;
-      estoque[chave] = estoque[chave] || 0;
-      estoque[chave] = adicionar ? estoque[chave] + quantidade : estoque[chave] - quantidade;
-
-      localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
-      atualizarTabela();
-      salvarEstoqueNaNuvem();
-    }
-
-    function zerarEstoque() {
-      const senha = prompt("Digite a senha para zerar o estoque:");
-      if (senha !== "1234") {
-        alert("Senha incorreta.");
-        return;
-      }
-      if (confirm("Tem certeza que deseja zerar o estoque?")) {
-        estoque = {};
-        localStorage.removeItem("estoqueVelas");
-        atualizarTabela();
-        salvarEstoqueNaNuvem();
-      }
-    }
-
-    function zerarVendas() {
-      const senha = prompt("Digite a senha para zerar as vendas:");
-      if (senha !== "1234") {
-        alert("Senha incorreta.");
-        return;
-      }
-      if (confirm("Tem certeza que deseja apagar todas as vendas?")) {
-        vendas = [];
-        localStorage.removeItem("vendasVelas");
-        atualizarVendas();
-        salvarVendasNaNuvem();
-      }
-    }
-
-    function atualizarTabela() {
-      const tbody = document.getElementById("tabelaEstoque");
-      tbody.innerHTML = "";
-      let totalQtd = 0;
-      let totalVal = 0;
-      for (const chave in estoque) {
-        const [aroma, peso, local] = chave.split("_");
-        const qtd = estoque[chave];
-        const valor = qtd * (parseInt(peso) === 160 ? 65 : 45);
-        totalQtd += qtd;
-        totalVal += valor;
-        tbody.innerHTML += `<tr class="${qtd < 0 ? 'negativo' : ''}">
-          <td>${aroma}</td>
-          <td>${peso}g</td>
-          <td>${qtd}</td>
-          <td>R$ ${valor.toFixed(2)}</td>
-          <td>${local}</td>
-        </tr>`;
-      }
-      document.getElementById("totalQtd").textContent = totalQtd;
-      document.getElementById("totalVal").textContent = "R$ " + totalVal.toFixed(2);
-    }
-
-    function atualizarVendas() {
-      const tbody = document.getElementById("tabelaVendas");
-      tbody.innerHTML = "";
-      vendas.forEach(v => {
-        tbody.innerHTML += `<tr>
-          <td>${v.data}</td>
-          <td>${v.aroma}</td>
-          <td>${v.peso}g</td>
-          <td>${v.quantidade}</td>
-          <td>R$ ${v.valorTotal.toFixed(2)}</td>
-        </tr>`;
-      });
-    }
-
-    function salvarEstoqueNaNuvem() {
-      const dados = Object.entries(estoque).map(([chave, qtd]) => {
-        const [aroma, peso, local] = chave.split("_");
-        return [aroma, peso, local, qtd];
-      });
-      fetch(webAppURL + "?tipo=Estoque", {
-        method: "POST",
-        body: JSON.stringify(dados)
-      });
-    }
-
-    function salvarVendasNaNuvem() {
-      const dados = vendas.map(v => [v.data, v.aroma, v.peso, v.quantidade, v.valorTotal]);
-      fetch(webAppURL + "?tipo=Vendas", {
-        method: "POST",
-        body: JSON.stringify(dados)
-      });
-    }
-
-    function carregarEstoqueDaNuvem() {
-      fetch(webAppURL + "?tipo=Estoque")
-        .then(res => res.json())
-        .then(data => {
-          estoque = {};
-          data.forEach(([aroma, peso, local, qtd]) => {
-            const chave = `${aroma}_${peso}_${local}`;
-            estoque[chave] = parseInt(qtd);
-          });
-          localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
-          atualizarTabela();
-        });
-    }
-
-    function carregarVendasDaNuvem() {
-      fetch(webAppURL + "?tipo=Vendas")
-        .then(res => res.json())
-        .then(data => {
-          vendas = data.map(([data, aroma, peso, qtd, valor]) => ({
-            data, aroma, peso, quantidade: parseInt(qtd), valorTotal: parseFloat(valor)
-          }));
-          localStorage.setItem("vendasVelas", JSON.stringify(vendas));
-          atualizarVendas();
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-      document.getElementById("registrarBtn").addEventListener("click", registrarVenda);
-      document.getElementById("adicionarBtn").addEventListener("click", function () {
-        alterarEstoque(true);
-      });
-      document.getElementById("removerBtn").addEventListener("click", function () {
-        alterarEstoque(false);
-      });
-      document.getElementById("zerarEstoqueBtn").addEventListener("click", zerarEstoque);
-      document.getElementById("zerarVendasBtn").addEventListener("click", zerarVendas);
-
-      carregarEstoqueDaNuvem();
-      carregarVendasDaNuvem();
     });
-  </script>
+}
+
+function carregarVendasDaNuvem() {
+  fetch(webAppURL + "?tipo=Vendas")
+    .then(res => res.json())
+    .then(data => {
+      vendas = data.map(([data, aroma, peso, quantidade, valorTotal]) => ({
+        data, aroma, peso, quantidade: parseInt(quantidade), valorTotal: parseFloat(valorTotal)
+      }));
+      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
+      atualizarVendas();
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("registrarBtn").addEventListener("click", registrarVenda);
+  document.getElementById("adicionarBtn").addEventListener("click", () => alterarEstoque(true));
+  document.getElementById("removerBtn").addEventListener("click", () => alterarEstoque(false));
+  document.getElementById("zerarEstoqueBtn").addEventListener("click", zerarEstoque);
+  document.getElementById("zerarVendasBtn").addEventListener("click", zerarVendas);
+
+  atualizarTabela();
+  atualizarVendas();
+  carregarEstoqueDaNuvem();
+  carregarVendasDaNuvem();
+});
+</script>
 </body>
 </html>
