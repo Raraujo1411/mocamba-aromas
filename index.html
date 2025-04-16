@@ -66,29 +66,6 @@
 
     <label><input type="checkbox" id="permitirNegativo" onchange="localStorage.setItem('estoqueNegativo', this.checked)"> Permitir estoque negativo</label>
 
-    <h2>Controle de Estoque</h2>
-    <form id="estoqueForm">
-      <label for="aroma">Aroma:</label>
-      <select id="aroma" required>
-        <option value="Baunilha">Baunilha</option>
-        <option value="Lavanda">Lavanda</option>
-        <option value="Alecrim">Alecrim</option>
-        <option value="Flor de Cerejeira">Flor de Cerejeira</option>
-      </select>
-
-      <label for="peso">Peso:</label>
-      <select id="peso" required>
-        <option value="100">100g</option>
-        <option value="160">160g</option>
-      </select>
-
-      <label for="quantidade">Quantidade:</label>
-      <input type="number" id="quantidade" min="1" required />
-
-      <button type="button" onclick="alterarEstoque(true)">Adicionar</button>
-      <button type="button" onclick="alterarEstoque(false)">Remover</button>
-    </form>
-
     <h2>Registrar Venda</h2>
     <form id="vendaForm">
       <label for="cliente">Cliente (opcional):</label>
@@ -151,22 +128,6 @@
     const vendas = JSON.parse(localStorage.getItem("vendasVelas")) || [];
     const permitirNegativo = localStorage.getItem("estoqueNegativo") === "true";
     document.getElementById("permitirNegativo").checked = permitirNegativo;
-
-    function alterarEstoque(adicionar) {
-      const aroma = document.getElementById("aroma").value;
-      const peso = document.getElementById("peso").value;
-      const quantidade = parseInt(document.getElementById("quantidade").value);
-      const chave = `${aroma}_${peso}`;
-      estoque[chave] = parseInt(estoque[chave]) || 0;
-      estoque[chave] = adicionar
-        ? estoque[chave] + quantidade
-        : permitirNegativo
-        ? estoque[chave] - quantidade
-        : Math.max(estoque[chave] - quantidade, 0);
-
-      localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
-      atualizarTabela();
-    }
 
     function registrarVenda() {
       const cliente = document.getElementById("cliente").value;
@@ -233,6 +194,46 @@
 
     atualizarTabela();
     atualizarVendas();
+
+    // Botão de relatório por data
+    document.addEventListener("DOMContentLoaded", () => {
+      const relatorioBtn = document.createElement("button");
+      relatorioBtn.textContent = "Gerar Relatório por Data";
+      relatorioBtn.style.marginTop = "15px";
+      relatorioBtn.style.padding = "10px";
+      relatorioBtn.style.backgroundColor = "#388e3c";
+      relatorioBtn.style.color = "white";
+      relatorioBtn.style.border = "none";
+      relatorioBtn.style.borderRadius = "5px";
+      relatorioBtn.style.fontWeight = "bold";
+      relatorioBtn.onclick = () => {
+        const dataFiltro = prompt("Digite a data no formato DD/MM/AAAA:");
+        if (!dataFiltro) return;
+
+        const vendasFiltradas = vendas.filter(v => v.data.startsWith(dataFiltro));
+        if (vendasFiltradas.length === 0) {
+          alert("Nenhuma venda encontrada para essa data.");
+          return;
+        }
+
+        let totalDia = 0;
+        let relatorio = `Relatório de Vendas - ${dataFiltro}\n\n`;
+        relatorio += "Cliente\tAroma\tPeso\tQtd\tValor\n";
+        relatorio += "--------------------------------------------------\n";
+
+        vendasFiltradas.forEach(v => {
+          relatorio += `${v.cliente || '-'}\t${v.aroma}\t${v.peso}g\t${v.quantidade}\tR$ ${v.valorTotal.toFixed(2)}\n`;
+          totalDia += v.valorTotal;
+        });
+
+        relatorio += "--------------------------------------------------\n";
+        relatorio += `Total do Dia: R$ ${totalDia.toFixed(2)}`;
+
+        alert(relatorio);
+      };
+
+      document.body.appendChild(relatorioBtn);
+    });
   </script>
 </body>
 </html>
