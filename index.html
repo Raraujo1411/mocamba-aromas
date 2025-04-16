@@ -63,7 +63,92 @@
 <body>
   <div class="container">
     <h1>Moçamba Aromas</h1>
-    <!-- Todo o conteúdo da página continua igual -->
+    <h2>Registrar Venda</h2>
+<form>
+  <label for="vendaAroma">Aroma:</label>
+  <select id="vendaAroma">
+    <option value="Baunilha">Baunilha</option>
+    <option value="Lavanda">Lavanda</option>
+    <option value="Alecrim">Alecrim</option>
+    <option value="Flor de Cerejeira">Flor de Cerejeira</option>
+  </select>
+
+  <label for="vendaPeso">Peso:</label>
+  <select id="vendaPeso">
+    <option value="100">100g</option>
+    <option value="160">160g</option>
+  </select>
+
+  <label for="vendaQuantidade">Quantidade:</label>
+  <input type="number" id="vendaQuantidade" min="1" />
+
+  <button type="button" onclick="registrarVenda()">Registrar Venda</button>
+</form>
+
+<h2>Adicionar Produto ao Estoque</h2>
+<form>
+  <label for="aroma">Aroma:</label>
+  <select id="aroma">
+    <option value="Baunilha">Baunilha</option>
+    <option value="Lavanda">Lavanda</option>
+    <option value="Alecrim">Alecrim</option>
+    <option value="Flor de Cerejeira">Flor de Cerejeira</option>
+  </select>
+
+  <label for="peso">Peso:</label>
+  <select id="peso">
+    <option value="100">100g</option>
+    <option value="160">160g</option>
+  </select>
+
+  <label for="quantidade">Quantidade:</label>
+  <input type="number" id="quantidade" min="1" />
+
+  <label for="local">Local:</label>
+  <input type="text" id="local" />
+
+  <button type="button" onclick="alterarEstoque(true)">Adicionar</button>
+  <button type="button" onclick="alterarEstoque(false)">Remover</button>
+</form>
+
+<button onclick="zerarEstoque()" style="background:red">Zerar Estoque</button>
+<button onclick="zerarVendas()" style="background:darkred">Zerar Vendas</button>
+
+<h2>Estoque Atual</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Aroma</th>
+      <th>Peso</th>
+      <th>Quantidade</th>
+      <th>Valor (R$)</th>
+      <th>Local</th>
+    </tr>
+  </thead>
+  <tbody id="tabelaEstoque"></tbody>
+  <tfoot>
+    <tr style="font-weight:bold; background:#f0f0f0">
+      <td colspan="2">Totais</td>
+      <td id="totalQtd"></td>
+      <td id="totalVal"></td>
+      <td>-</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h2>Histórico de Vendas</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Aroma</th>
+      <th>Peso</th>
+      <th>Qtd</th>
+      <th>Valor (R$)</th>
+    </tr>
+  </thead>
+  <tbody id="tabelaVendas"></tbody>
+</table>
   </div>
 
   <script>
@@ -163,7 +248,6 @@
 
     function atualizarTabela() {
       const tbody = document.getElementById("tabelaEstoque");
-      if (!tbody) return;
       tbody.innerHTML = "";
       let totalQtd = 0;
       let totalVal = 0;
@@ -191,9 +275,7 @@
 
     function atualizarVendas() {
       const tbody = document.getElementById("tabelaVendas");
-      if (!tbody) return;
       tbody.innerHTML = "";
-
       vendas.forEach(v => {
         tbody.innerHTML += `
           <tr>
@@ -222,11 +304,9 @@
       }
     }
 
-    // Inicialização
     carregarEstoqueDaNuvem();
     carregarVendasDaNuvem();
 
-    // Atualização automática a cada 15 segundos
     setInterval(() => {
       carregarEstoqueDaNuvem();
       carregarVendasDaNuvem();
