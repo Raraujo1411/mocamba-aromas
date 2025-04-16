@@ -196,11 +196,24 @@ function registrarVenda() {
   const quantidade = parseInt(document.getElementById("vendaQuantidade").value);
   const valorUnitario = peso === 160 ? 65 : 45;
   const valorTotal = valorUnitario * quantidade;
-  const chave = `${aroma}_${peso}`;
 
-  estoque[chave] = parseInt(estoque[chave]) || 0;
-  estoque[chave] -= quantidade;
+  // Tentar encontrar o primeiro local disponível com estoque suficiente
+  let chaveEncontrada = null;
+  for (const chave in estoque) {
+    if (chave === '_locais') continue;
+    const [a, p, l] = chave.split("_");
+    if (a === aroma && parseInt(p) === peso && estoque[chave] >= quantidade) {
+      chaveEncontrada = chave;
+      break;
+    }
+  }
 
+  if (!chaveEncontrada) {
+    alert("Estoque insuficiente para essa venda!");
+    return;
+  }
+
+  estoque[chaveEncontrada] -= quantidade;
   const data = new Date().toLocaleDateString("pt-BR");
   vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
   if (vendas.length > 100) vendas.pop();
