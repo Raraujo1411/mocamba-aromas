@@ -169,7 +169,7 @@
       localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
       atualizarTabela();
     });
-    });
+});
     }
 
     async function carregarVendasDaNuvem() {
@@ -182,7 +182,7 @@
       localStorage.setItem("vendasVelas", JSON.stringify(vendas));
       atualizarVendas();
     });
-    });
+});
     }
 
     function salvarEstoqueNaNuvem() {
@@ -249,10 +249,15 @@
 
   const data = new Date().toLocaleDateString("pt-BR");
   vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
+
+  localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
+  localStorage.setItem("vendasVelas", JSON.stringify(vendas));
+
   atualizarTabela();
   atualizarVendas();
   salvarEstoqueNaNuvem();
   salvarVendasNaNuvem();
+}
     }
 
     function atualizarTabela() {
