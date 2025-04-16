@@ -198,14 +198,24 @@ function registrarVenda() {
   const valorUnitario = peso === 160 ? 65 : 45;
   const valorTotal = valorUnitario * quantidade;
 
-  let chaveEncontrada = null;
+  let chavesEncontradas = [];
   for (const chave in estoque) {
     if (chave === '_locais') continue;
     const [a, p, l] = chave.split("_");
     if (a === aroma && parseInt(p) === peso) {
-      chaveEncontrada = chave;
-      break;
+      chavesEncontradas.push(chave);
     }
+  }
+
+  if (chavesEncontradas.length === 0) {
+    alert("Produto não encontrado no estoque!");
+    return;
+  }
+
+  // Usar a primeira chave encontrada por padrão (ou melhorar a lógica depois)
+  const chaveUsada = chavesEncontradas[0];
+  estoque[chaveUsada] = parseInt(estoque[chaveUsada]) || 0;
+  estoque[chaveUsada] -= quantidade;
   }
 
   if (!chaveEncontrada) {
