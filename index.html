@@ -219,6 +219,7 @@ function registrarVenda() {
   localStorage.setItem("vendasVelas", JSON.stringify(vendas));
 
   atualizarTabela();
+      mostrarNotificacao("Estoque sincronizado com sucesso.");
   atualizarVendas();
 
   mostrarNotificacao("Venda registrada e estoque atualizado com sucesso.");
@@ -246,15 +247,9 @@ function alterarEstoque(adicionar) {
   salvarEstoqueNaNuvem();
 }
 
-function zerarEstoque() {
-  const senha = prompt("Digite a senha para zerar o estoque:");
-  if (senha !== "1234") return alert("Senha incorreta.");
-  if (confirm("Tem certeza que deseja zerar o estoque?")) {
-    estoque = {};
-    localStorage.removeItem("estoqueVelas");
-    atualizarTabela();
-    salvarEstoqueNaNuvem();
+function zerarEstoque() {$1mostrarNotificacao("Estoque zerado com sucesso.");
   }
+}
 }
 
 function zerarVendas() {
@@ -265,6 +260,9 @@ function zerarVendas() {
     localStorage.removeItem("vendasVelas");
     atualizarVendas();
     salvarVendasNaNuvem();
+    carregarVendasDaNuvem();
+    mostrarNotificacao("Histórico de vendas zerado com sucesso.");
+  }
   }
 }
 
@@ -331,13 +329,19 @@ function salvarVendasNaNuvem() {
 
 function carregarEstoqueDaNuvem() {
   const syncStatus = document.getElementById("syncStatus");
-syncStatus.textContent = "Sincronizando estoque...";
-syncStatus.className = "fade-in";
+  syncStatus.textContent = "Sincronizando estoque...";
+  syncStatus.className = "fade-in";
+
   fetch(webAppURL + "?tipo=Estoque")
-    .catch(() => mostrarNotificacao("Erro ao carregar estoque da nuvem.", "error"))
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error("Erro na resposta da planilha de estoque");
+      return res.json();
+    })
     .then(data => {
-      if (!Array.isArray(data) || data.length === 0) return;
+      if (!Array.isArray(data) || data.length === 0) {
+        mostrarNotificacao("Nenhum estoque encontrado na nuvem.", "error");
+        return;
+      }
       estoque = {};
       data.forEach(([aroma, peso, local, qtd]) => {
         const chave = `${aroma}_${peso}_${local}`;
@@ -366,13 +370,11 @@ function carregarVendasDaNuvem() {
       vendas = data.map(([data, aroma, peso, quantidade, valorTotal]) => ({
         data, aroma, peso, quantidade: parseInt(quantidade), valorTotal: parseFloat(valorTotal)
       }));
-      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
-      atualizarVendas();
+      
       mostrarNotificacao("Vendas sincronizadas com sucesso.");
     })
     .catch(() => mostrarNotificacao("Erro ao carregar vendas da nuvem.", "error"));
-      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
-      atualizarVendas();
+      
     });
 }
 
