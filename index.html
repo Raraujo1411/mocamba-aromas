@@ -114,14 +114,11 @@
   <button type="button" onclick="alterarEstoque(true)">Adicionar</button>
   <button type="button" onclick="alterarEstoque(false)">Remover</button>
 </form>
-<div style="display:flex; flex-wrap: wrap; gap:10px; margin-top:20px;">
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-top:20px;">
   <button onclick="salvarEstoqueNaNuvem()" style="flex:1; background:#2196f3;">Salvar Estoque na Nuvem</button>
   <button onclick="carregarEstoqueDaNuvem()" style="flex:1; background:#4caf50;">Carregar Estoque da Nuvem</button>
   <button onclick="salvarVendasNaNuvem()" style="flex:1; background:#2196f3;">Salvar Vendas na Nuvem</button>
-  <button onclick="carregarVendasDaNuvem()" style="flex:1; background:#4caf50;">Carregar Vendas da Nuvem</button>rgin-top:20px;">
-  <button onclick="salvarEstoqueNaNuvem()" style="flex:1; background:#2196f3;">Salvar Estoque na Nuvem</button>
-  <button onclick="carregarEstoqueDaNuvem()" style="flex:1; background:#4caf50;">Carregar Estoque da Nuvem</button>
-  <button onclick="salvarVendasNaNuvem()" style="flex:1; background:#2196f3;">Salvar Vendas na Nuvem<
+  <button onclick="carregarVendasDaNuvem()" style="flex:1; background:#4caf50;">Carregar Vendas da Nuvem</button>
   <button onclick="zerarEstoque()" style="flex:1; background:red;">Zerar Estoque</button>
   <button onclick="zerarVendas()" style="flex:1; background:darkred;">Zerar Vendas</button>
 </div>
@@ -301,7 +298,21 @@ function atualizarTabela() {
 
   Object.entries(subtotaisPorLocal).forEach(([local, subtotal]) => {
     const row = `<tr style="background:#e0f7fa; font-weight:bold;">
-      <td colspan="2">Subtotal $// ==== INTEGRAÇÃO COM GOOGLE SHEETS ====
+      <td colspan="2">Subtotal ${local}</td>
+      <td>${subtotal.qtd}</td>
+      <td>R$ ${subtotal.valor.toFixed(2)}</td>
+      <td>${local}</td>
+    </tr>`;
+    tbody.innerHTML += row;
+  });
+
+  document.getElementById("totalQtd").textContent = totalQtd;
+  document.getElementById("totalVal").textContent = `R$ ${totalVal.toFixed(2)}`;
+}
+
+atualizarTabela();
+atualizarVendas();
+// ==== INTEGRAÇÃO COM GOOGLE SHEETS ====
 const webAppURL = "https://script.google.com/macros/s/AKfycbxWCJfGFajO2nNJmA7oU64MW-CF5cxYm8cGKZiIwUyxdoNXVuDzDkSPXCbycd0zltUr/exec";
 
 function salvarEstoqueNaNuvem() {
@@ -355,20 +366,6 @@ function carregarVendasDaNuvem() {
       alert("Vendas carregadas da nuvem!");
     });
 }
-</script>td>
-      <td>${subtotal.qtd}</td>
-      <td>R$ ${subtotal.valor.toFixed(2)}</td>
-      <td>${local}</td>
-    </tr>`;
-    tbody.innerHTML += row;
-  });
-
-  document.getElementById("totalQtd").textContent = totalQtd;
-  document.getElementById("totalVal").textContent = `R$ ${totalVal.toFixed(2)}`;
-}
-
-atualizarTabela();
-atualizarVendas();
 </script>
   </div>
 </body>
