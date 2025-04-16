@@ -82,6 +82,31 @@
       <button type="button" onclick="alterarEstoque(false)">Remover</button>
     </form>
 
+    <h2>Registrar Venda</h2>
+    <form id="vendaForm">
+      <label for="cliente">Cliente (opcional):</label>
+      <input type="text" id="cliente" placeholder="Nome do cliente" />
+
+      <label for="vendaAroma">Aroma:</label>
+      <select id="vendaAroma">
+        <option value="Baunilha">Baunilha</option>
+        <option value="Lavanda">Lavanda</option>
+        <option value="Alecrim">Alecrim</option>
+        <option value="Flor de Cerejeira">Flor de Cerejeira</option>
+      </select>
+
+      <label for="vendaPeso">Peso:</label>
+      <select id="vendaPeso">
+        <option value="100">100g</option>
+        <option value="160">160g</option>
+      </select>
+
+      <label for="vendaQuantidade">Quantidade:</label>
+      <input type="number" id="vendaQuantidade" min="1" required />
+
+      <button type="button" onclick="registrarVenda()">Registrar Venda</button>
+    </form>
+
     <h2>Estoque Atual</h2>
     <table>
       <thead>
@@ -107,11 +132,26 @@
       </thead>
       <tbody id="tabelaHistorico"></tbody>
     </table>
+
+    <h2>Histórico de Vendas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Cliente</th>
+          <th>Aroma</th>
+          <th>Peso</th>
+          <th>Qtd</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaVendas"></tbody>
+    </table>
   </div>
 
   <script>
     const estoque = JSON.parse(localStorage.getItem("estoqueVelas")) || {};
     const historico = JSON.parse(localStorage.getItem("historicoVelas")) || [];
+    const vendas = JSON.parse(localStorage.getItem("vendasVelas")) || [];
 
     function alterarEstoque(adicionar) {
       const aroma = document.getElementById("aroma").value;
@@ -130,13 +170,34 @@
       }
 
       historico.unshift({ data, tipo, aroma, peso, quantidade });
-      if (historico.length > 100) historico.pop(); // Limita o histórico
+      if (historico.length > 100) historico.pop();
 
       localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
       localStorage.setItem("historicoVelas", JSON.stringify(historico));
 
       atualizarTabela();
       atualizarHistorico();
+    }
+
+    function registrarVenda() {
+      const cliente = document.getElementById("cliente").value;
+      const aroma = document.getElementById("vendaAroma").value;
+      const peso = document.getElementById("vendaPeso").value;
+      const quantidade = parseInt(document.getElementById("vendaQuantidade").value);
+      const chave = `${aroma}_${peso}`;
+      const data = new Date().toLocaleString("pt-BR");
+
+      estoque[chave] = parseInt(estoque[chave]) || 0;
+      estoque[chave] = Math.max(estoque[chave] - quantidade, 0);
+
+      vendas.unshift({ data, cliente, aroma, peso, quantidade });
+      if (vendas.length > 100) vendas.pop();
+
+      localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
+      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
+
+      atualizarTabela();
+      atualizarVendas();
     }
 
     function atualizarTabela() {
@@ -165,8 +226,24 @@
       });
     }
 
+    function atualizarVendas() {
+      const tbody = document.getElementById("tabelaVendas");
+      tbody.innerHTML = "";
+      vendas.forEach(entry => {
+        const row = `<tr>
+          <td>${entry.data}</td>
+          <td>${entry.cliente || "-"}</td>
+          <td>${entry.aroma}</td>
+          <td>${entry.peso}g</td>
+          <td>${entry.quantidade}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
     atualizarTabela();
     atualizarHistorico();
+    atualizarVendas();
   </script>
 </body>
 </html>
