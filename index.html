@@ -208,8 +208,12 @@ function registrarVenda() {
   const valorTotal = valorUnitario * quantidade;
 
   const chaves = Object.keys(estoque).filter(k => k.startsWith(`${aroma}_${peso}_`));
-  const chave = chaves[0] || `${aroma}_${peso}_GERACAO VITAL`;
-  estoque[chave] = (estoque[chave] || 0) - quantidade;
+  let chave = chaves[0];
+  if (!chave) {
+    chave = `${aroma}_${peso}_GERACAO VITAL`;
+    if (!estoque[chave]) estoque[chave] = 0;
+  }
+  estoque[chave] -= quantidade;
 
   const data = new Date().toLocaleDateString("pt-BR");
   vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
@@ -225,6 +229,7 @@ function registrarVenda() {
   mostrarNotificacao("Venda registrada e estoque atualizado com sucesso.");
 
   salvarVendasNaNuvem();
+  salvarEstoqueNaNuvem();
 }
 
 function alterarEstoque(adicionar) {
