@@ -334,11 +334,20 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("zerarEstoqueBtn").addEventListener("click", zerarEstoque);
   document.getElementById("zerarVendasBtn").addEventListener("click", zerarVendas);
 
-  atualizarTabela();
-  atualizarVendas();
+  carregarEstoqueDaNuvem();
+  carregarVendasDaNuvem();
   carregarEstoqueDaNuvem();
   carregarVendasDaNuvem();
 });
+window.addEventListener("focus", () => {
+  carregarEstoqueDaNuvem();
+  carregarVendasDaNuvem();
+});
+
+setInterval(() => {
+  carregarEstoqueDaNuvem();
+  carregarVendasDaNuvem();
+}, 15000); // atualiza a cada 15 segundos
 </script>
 </body>
 </html>
