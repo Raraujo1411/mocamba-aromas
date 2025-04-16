@@ -63,106 +63,139 @@
 <body>
   <div class="container">
     <h1>Moçamba Aromas</h1>
+    
+    <h2>Registrar Venda</h2>
+    <form>
+      <label for="vendaAroma">Aroma:</label>
+      <select id="vendaAroma">
+        <option value="Baunilha">Baunilha</option>
+        <option value="Lavanda">Lavanda</option>
+        <option value="Alecrim">Alecrim</option>
+        <option value="Flor de Cerejeira">Flor de Cerejeira</option>
+      </select>
 
-    <div class="container">
-      <h2>Registrar Venda</h2>
-      <form id="vendaForm">
-        <label for="vendaAroma">Aroma:</label>
-        <select id="vendaAroma">
-          <option value="Baunilha">Baunilha</option>
-          <option value="Lavanda">Lavanda</option>
-          <option value="Alecrim">Alecrim</option>
-          <option value="Flor de Cerejeira">Flor de Cerejeira</option>
-        </select>
+      <label for="vendaPeso">Peso:</label>
+      <select id="vendaPeso">
+        <option value="100">100g</option>
+        <option value="160">160g</option>
+      </select>
 
-        <label for="vendaPeso">Peso:</label>
-        <select id="vendaPeso">
-          <option value="100">100g</option>
-          <option value="160">160g</option>
-        </select>
+      <label for="vendaQuantidade">Quantidade:</label>
+      <input type="number" id="vendaQuantidade" min="1" />
 
-        <label for="vendaQuantidade">Quantidade:</label>
-        <input type="number" id="vendaQuantidade" min="1" required />
+      <button type="button" onclick="registrarVenda()">Registrar Venda</button>
+    </form>
 
-        <button type="button" onclick="registrarVenda()">Registrar Venda</button>
-      </form>
-    </div>
+    <h2>Adicionar Produto ao Estoque</h2>
+    <form>
+      <label for="aroma">Aroma:</label>
+      <select id="aroma">
+        <option value="Baunilha">Baunilha</option>
+        <option value="Lavanda">Lavanda</option>
+        <option value="Alecrim">Alecrim</option>
+        <option value="Flor de Cerejeira">Flor de Cerejeira</option>
+      </select>
 
-    <div class="container">
-      <h2>Adicionar Produto ao Estoque</h2>
-      <form id="estoqueForm">
-        <label for="aroma">Aroma:</label>
-        <select id="aroma">
-          <option value="Baunilha">Baunilha</option>
-          <option value="Lavanda">Lavanda</option>
-          <option value="Alecrim">Alecrim</option>
-          <option value="Flor de Cerejeira">Flor de Cerejeira</option>
-        </select>
+      <label for="peso">Peso:</label>
+      <select id="peso">
+        <option value="100">100g</option>
+        <option value="160">160g</option>
+      </select>
 
-        <label for="peso">Peso:</label>
-        <select id="peso">
-          <option value="100">100g</option>
-          <option value="160">160g</option>
-        </select>
+      <label for="quantidade">Quantidade:</label>
+      <input type="number" id="quantidade" min="1" />
 
-        <label for="quantidade">Quantidade:</label>
-        <input type="number" id="quantidade" min="1" required />
+      <label for="local">Local:</label>
+      <input type="text" id="local" />
 
-        <label for="local">Local:</label>
-        <input type="text" id="local" placeholder="Ex: Loja, Feira, Estoque" required />
+      <button type="button" onclick="alterarEstoque(true)">Adicionar</button>
+      <button type="button" onclick="alterarEstoque(false)">Remover</button>
+    </form>
 
-        <button type="button" onclick="alterarEstoque(true)">Adicionar</button>
-        <button type="button" onclick="alterarEstoque(false)">Remover</button>
-      </form>
+    <button onclick="zerarEstoque()" style="background:red">Zerar Estoque</button>
+    <button onclick="zerarVendas()" style="background:darkred">Zerar Vendas</button>
 
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-top:20px;">
-        <button onclick="zerarEstoque()" style="flex:1; background:red;">Zerar Estoque</button>
-        <button onclick="zerarVendas()" style="flex:1; background:darkred;">Zerar Vendas</button>
-      </div>
+    <h2>Estoque Atual</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Aroma</th>
+          <th>Peso</th>
+          <th>Quantidade</th>
+          <th>Valor (R$)</th>
+          <th>Local</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaEstoque"></tbody>
+      <tfoot>
+        <tr style="font-weight:bold; background:#f0f0f0">
+          <td colspan="2">Totais</td>
+          <td id="totalQtd"></td>
+          <td id="totalVal"></td>
+          <td>-</td>
+        </tr>
+      </tfoot>
+    </table>
 
-      <h2>Estoque Atual</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Aroma</th>
-            <th>Peso</th>
-            <th>Quantidade</th>
-            <th>Valor (R$)</th>
-            <th>Local</th>
-          </tr>
-        </thead>
-        <tbody id="tabelaEstoque"></tbody>
-        <tfoot>
-          <tr style="font-weight:bold; background:#f0f0f0">
-            <td colspan="2">Totais</td>
-            <td id="totalQtd"></td>
-            <td id="totalVal"></td>
-            <td>-</td>
-          </tr>
-        </tfoot>
-      </table>
-
-      <h2>Histórico de Vendas</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Aroma</th>
-            <th>Peso</th>
-            <th>Qtd</th>
-            <th>Valor (R$)</th>
-          </tr>
-        </thead>
-        <tbody id="tabelaVendas"></tbody>
-      </table>
-    </div>
+    <h2>Histórico de Vendas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Aroma</th>
+          <th>Peso</th>
+          <th>Qtd</th>
+          <th>Valor (R$)</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaVendas"></tbody>
+    </table>
   </div>
 
   <script>
-    const webAppURL = ""; // insira aqui seu link do Google Apps Script, se quiser sincronizar com planilha
+    const webAppURL = "https://script.google.com/macros/s/AKfycby1N0n9s7dJEfBXmBZvbkzws1TvgLF_F_VojMT1AV8/exec";
 
-    let estoque = JSON.parse(localStorage.getItem("estoqueVelas")) || {};
-    let vendas = JSON.parse(localStorage.getItem("vendasVelas")) || [];
+    let estoque = {};
+    let vendas = [];
+
+    async function carregarEstoqueDaNuvem() {
+      const res = await fetch(webAppURL + "?tipo=Estoque");
+      const data = await res.json();
+      estoque = {};
+      data.forEach(([aroma, peso, local, qtd]) => {
+        const chave = `${aroma}_${peso}_${local}`;
+        estoque[chave] = parseInt(qtd);
+      });
+      atualizarTabela();
+    }
+
+    async function carregarVendasDaNuvem() {
+      const res = await fetch(webAppURL + "?tipo=Vendas");
+      const data = await res.json();
+      vendas = data.map(([data, aroma, peso, qtd, valor]) => ({
+        data, aroma, peso, quantidade: parseInt(qtd), valorTotal: parseFloat(valor)
+      }));
+      atualizarVendas();
+    }
+
+    function salvarEstoqueNaNuvem() {
+      const dados = Object.entries(estoque).map(([chave, qtd]) => {
+        const [aroma, peso, local] = chave.split("_");
+        return [aroma, peso, local, qtd];
+      });
+      fetch(webAppURL + "?tipo=Estoque", {
+        method: "POST",
+        body: JSON.stringify(dados)
+      });
+    }
+
+    function salvarVendasNaNuvem() {
+      const dados = vendas.map(v => [v.data, v.aroma, v.peso, v.quantidade, v.valorTotal]);
+      fetch(webAppURL + "?tipo=Vendas", {
+        method: "POST",
+        body: JSON.stringify(dados)
+      });
+    }
 
     function alterarEstoque(adicionar) {
       const aroma = document.getElementById("aroma").value;
@@ -177,14 +210,11 @@
 
       const quantidade = parseInt(quantidadeInput);
       const chave = `${aroma}_${peso}_${local}`;
-      estoque[chave] = parseInt(estoque[chave]) || 0;
+      estoque[chave] = estoque[chave] || 0;
       estoque[chave] = adicionar ? estoque[chave] + quantidade : estoque[chave] - quantidade;
 
-      if (!estoque._locais) estoque._locais = {};
-      estoque._locais[chave] = local;
-
-      localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
       atualizarTabela();
+      salvarEstoqueNaNuvem();
     }
 
     function registrarVenda() {
@@ -198,31 +228,22 @@
       }
 
       const quantidade = parseInt(quantidadeInput);
-      const valorUnitario = peso === 160 ? 65 : 45;
-      const valorTotal = valorUnitario * quantidade;
+      const valorUnit = peso === 160 ? 65 : 45;
+      const valorTotal = valorUnit * quantidade;
 
-      let chaves = Object.keys(estoque).filter(k => {
-        if (k === "_locais") return false;
-        const [a, p] = k.split("_");
-        return a === aroma && parseInt(p) === peso;
-      });
-
-      if (chaves.length === 0) {
-        alert("Produto não encontrado no estoque!");
+      const chave = Object.keys(estoque).find(k => k.startsWith(`${aroma}_${peso}_`));
+      if (!chave) {
+        alert("Produto não encontrado no estoque.");
         return;
       }
 
-      const chaveUsada = chaves[0];
-      estoque[chaveUsada] -= quantidade;
-
+      estoque[chave] -= quantidade;
       const data = new Date().toLocaleDateString("pt-BR");
       vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
-      if (vendas.length > 100) vendas.pop();
-
-      localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
-      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
       atualizarTabela();
       atualizarVendas();
+      salvarEstoqueNaNuvem();
+      salvarVendasNaNuvem();
     }
 
     function atualizarTabela() {
@@ -232,12 +253,9 @@
       let totalVal = 0;
 
       for (const chave in estoque) {
-        if (chave === "_locais") continue;
         const [aroma, peso, local] = chave.split("_");
         const qtd = estoque[chave];
-        const valorUnit = parseInt(peso) === 160 ? 65 : 45;
-        const valor = valorUnit * qtd;
-
+        const valor = qtd * (parseInt(peso) === 160 ? 65 : 45);
         totalQtd += qtd;
         totalVal += valor;
 
@@ -273,34 +291,27 @@
             <td>R$ ${v.valorTotal.toFixed(2)}</td>
           </tr>`;
       });
-
-      tbody.innerHTML += `
-        <tr style="font-weight:bold; background:#f0f0f0">
-          <td colspan="3">Total</td>
-          <td>${totalQtd}</td>
-          <td>R$ ${totalVal.toFixed(2)}</td>
-        </tr>`;
     }
 
     function zerarEstoque() {
       if (confirm("Tem certeza que deseja zerar o estoque?")) {
         estoque = {};
-        localStorage.removeItem("estoqueVelas");
         atualizarTabela();
+        salvarEstoqueNaNuvem();
       }
     }
 
     function zerarVendas() {
       if (confirm("Tem certeza que deseja apagar todas as vendas?")) {
         vendas = [];
-        localStorage.removeItem("vendasVelas");
         atualizarVendas();
+        salvarVendasNaNuvem();
       }
     }
 
     // Inicialização
-    atualizarTabela();
-    atualizarVendas();
+    carregarEstoqueDaNuvem();
+    carregarVendasDaNuvem();
   </script>
 </body>
 </html>
