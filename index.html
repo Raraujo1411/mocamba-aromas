@@ -65,35 +65,40 @@
     <h1>Moçamba Aromas</h1>
     <h2>Registrar Venda</h2>
     <form>
-      <label for="vendaAroma">Aroma:</label>
-      <select id="vendaAroma">
-        <option value="Baunilha">Baunilha</option>
-        <option value="Lavanda">Lavanda</option>
-        <option value="Alecrim">Alecrim</option>
-        <option value="Flor de Cerejeira">Flor de Cerejeira</option>
-      </select>
-
-      <label for="vendaPeso">Peso:</label>
-      <select id="vendaPeso">
-        <option value="100">100g</option>
-        <option value="160">160g</option>
-      </select>
-
-      <label for="vendaQuantidade">Quantidade:</label>
-      <input type="number" id="vendaQuantidade" min="1" />
-
-      <button type="button" onclick="registrarVenda()">Registrar Venda</button>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+  <div style="flex: 1; min-width: 150px;">
+    <label for="vendaAroma">Aroma:</label>
+    <select id="vendaAroma">
+      <option value="Alecrim">Alecrim</option>
+      <option value="Baunilha">Baunilha</option>
+      <option value="Flor de Cerejeira">Flor de Cerejeira</option>
+      <option value="Lavanda">Lavanda</option>
+    </select>
+  </div>
+  <div style="flex: 1; min-width: 100px;">
+    <label for="vendaPeso">Peso:</label>
+    <select id="vendaPeso">
+      <option value="100">100g</option>
+      <option value="160">160g</option>
+    </select>
+  </div>
+  <div style="flex: 1; min-width: 80px;">
+    <label for="vendaQuantidade">Quantidade:</label>
+    <input type="number" id="vendaQuantidade" min="1" />
+  </div>
+</div>
+<button type="button" onclick="registrarVenda()">Registrar Venda</button>
     </form>
 
     <h2>Adicionar Produto ao Estoque</h2>
     <form>
       <label for="aroma">Aroma:</label>
-      <select id="aroma">
-        <option value="Baunilha">Baunilha</option>
-        <option value="Lavanda">Lavanda</option>
-        <option value="Alecrim">Alecrim</option>
-        <option value="Flor de Cerejeira">Flor de Cerejeira</option>
-      </select>
+<select id="aroma">
+  <option value="Alecrim">Alecrim</option>
+  <option value="Baunilha">Baunilha</option>
+  <option value="Flor de Cerejeira">Flor de Cerejeira</option>
+  <option value="Lavanda">Lavanda</option>
+</select>
 
       <label for="peso">Peso:</label>
       <select id="peso">
@@ -205,7 +210,8 @@
     function alterarEstoque(adicionar) {
       const aroma = document.getElementById("aroma").value;
       const peso = document.getElementById("peso").value;
-      const local = document.getElementById("local").value;
+      let local = document.getElementById("local").value.trim();
+      if (!local) local = "GERACAO VITAL";
       const quantidadeInput = document.getElementById("quantidade").value;
 
       if (!quantidadeInput || isNaN(quantidadeInput) || parseInt(quantidadeInput) <= 0) {
