@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Moçamba Aromas - Estoque</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    label {
+      margin-top: 10px;
+      display: block;
+      font-weight: bold;
+    }
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #5c6bc0;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #eee;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Moçamba Aromas</h1>
+    <h2>Controle de Estoque</h2>
+
+    <form id="estoqueForm">
+      <label for="aroma">Aroma:</label>
+      <select id="aroma" required>
+        <option value="Baunilha">Baunilha</option>
+        <option value="Lavanda">Lavanda</option>
+        <option value="Alecrim">Alecrim</option>
+        <option value="Flor de Cerejeira">Flor de Cerejeira</option>
+      </select>
+
+      <label for="peso">Peso:</label>
+      <select id="peso" required>
+        <option value="100">100g</option>
+        <option value="160">160g</option>
+      </select>
+
+      <label for="quantidade">Quantidade:</label>
+      <input type="number" id="quantidade" min="1" required />
+
+      <button type="button" onclick="alterarEstoque(true)">Adicionar</button>
+      <button type="button" onclick="alterarEstoque(false)">Remover</button>
+    </form>
+
+    <h2>Estoque Atual</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Aroma</th>
+          <th>Peso</th>
+          <th>Quantidade</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaEstoque"></tbody>
+    </table>
+
+    <h2>Histórico de Movimentações</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Tipo</th>
+          <th>Aroma</th>
+          <th>Peso</th>
+          <th>Qtd</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaHistorico"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const estoque = JSON.parse(localStorage.getItem("estoqueVelas")) || {};
+    const historico = JSON.parse(localStorage.getItem("historicoVelas")) || [];
+
+    function alterarEstoque(adicionar) {
+      const aroma = document.getElementById("aroma").value;
+      const peso = document.getElementById("peso").value;
+      const quantidade = parseInt(document.getElementById("quantidade").value);
+      const chave = `${aroma}_${peso}`;
+      const tipo = adicionar ? "Entrada" : "Saída";
+      const data = new Date().toLocaleString("pt-BR");
+
+      estoque[chave] = parseInt(estoque[chave]) || 0;
+
+      if (adicionar) {
+        estoque[chave] += quantidade;
+      } else {
+        estoque[chave] = Math.max(estoque[chave] - quantidade, 0);
+      }
+
+      historico.unshift({ data, tipo, aroma, peso, quantidade });
+      if (historico.length > 100) historico.pop(); // Limita o histórico
+
+      localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
+      localStorage.setItem("historicoVelas", JSON.stringify(historico));
+
+      atualizarTabela();
+      atualizarHistorico();
+    }
+
+    function atualizarTabela() {
+      const tbody = document.getElementById("tabelaEstoque");
+      tbody.innerHTML = "";
+      for (const chave in estoque) {
+        const [aroma, peso] = chave.split("_");
+        const quantidade = estoque[chave];
+        const row = `<tr><td>${aroma}</td><td>${peso}g</td><td>${quantidade}</td></tr>`;
+        tbody.innerHTML += row;
+      }
+    }
+
+    function atualizarHistorico() {
+      const tbody = document.getElementById("tabelaHistorico");
+      tbody.innerHTML = "";
+      historico.forEach(entry => {
+        const row = `<tr>
+          <td>${entry.data}</td>
+          <td>${entry.tipo}</td>
+          <td>${entry.aroma}</td>
+          <td>${entry.peso}g</td>
+          <td>${entry.quantidade}</td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    atualizarTabela();
+    atualizarHistorico();
+  </script>
+</body>
+</html>
