@@ -350,16 +350,27 @@ syncStatus.className = "fade-in";
 
 function carregarVendasDaNuvem() {
   const syncStatus = document.getElementById("syncStatus");
-syncStatus.textContent = "Sincronizando vendas...";
-syncStatus.className = "fade-in";
+  syncStatus.textContent = "Sincronizando vendas...";
+  syncStatus.className = "fade-in";
+
   fetch(webAppURL + "?tipo=Vendas")
-    .catch(() => mostrarNotificacao("Erro ao carregar vendas da nuvem.", "error"))
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error("Erro na resposta da planilha");
+      return res.json();
+    })
     .then(data => {
-      if (!Array.isArray(data) || data.length === 0) return;
+      if (!Array.isArray(data) || data.length === 0) {
+        mostrarNotificacao("Nenhuma venda encontrada na nuvem.", "error");
+        return;
+      }
       vendas = data.map(([data, aroma, peso, quantidade, valorTotal]) => ({
         data, aroma, peso, quantidade: parseInt(quantidade), valorTotal: parseFloat(valorTotal)
       }));
+      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
+      atualizarVendas();
+      mostrarNotificacao("Vendas sincronizadas com sucesso.");
+    })
+    .catch(() => mostrarNotificacao("Erro ao carregar vendas da nuvem.", "error"));
       localStorage.setItem("vendasVelas", JSON.stringify(vendas));
       atualizarVendas();
     });
