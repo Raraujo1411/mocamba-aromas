@@ -203,7 +203,11 @@ function registrarVenda() {
   if (vendas.length > 100) vendas.pop();
 
   localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
+      atualizarTabela();
+      document.getElementById("syncStatus").textContent = "Estoque sincronizado com sucesso.";
   localStorage.setItem("vendasVelas", JSON.stringify(vendas));
+      atualizarVendas();
+      document.getElementById("syncStatus").textContent = "Vendas sincronizadas com sucesso.";
   atualizarTabela();
       document.getElementById("syncStatus").textContent = "Estoque sincronizado com sucesso.";
   atualizarVendas();
@@ -350,6 +354,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   carregarEstoqueDaNuvem();
   carregarVendasDaNuvem();
+  atualizarTabela();
+  atualizarVendas();
+  document.getElementById("syncStatus").textContent = "Dados sincronizados com sucesso.";
   carregarEstoqueDaNuvem();
   carregarVendasDaNuvem();
 });
