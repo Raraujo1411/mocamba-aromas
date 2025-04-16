@@ -276,7 +276,7 @@ function zerarVendas() {
     carregarVendasDaNuvem();
     mostrarNotificacao("Histórico de vendas zerado com sucesso.");
   }
-  }
+}
 }
 
 function atualizarTabela() {
@@ -362,6 +362,7 @@ function carregarEstoqueDaNuvem() {
       });
       localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
       atualizarTabela();
+      mostrarNotificacao("Estoque sincronizado com sucesso.");
     });
 }
 
@@ -385,8 +386,9 @@ function carregarVendasDaNuvem() {
       }));
       localStorage.setItem("vendasVelas", JSON.stringify(vendas));
       atualizarVendas();
-      
       mostrarNotificacao("Vendas sincronizadas com sucesso.");
+    })
+    .catch(() => mostrarNotificacao("Erro ao carregar vendas da nuvem.", "error"));
     })
     .catch(() => mostrarNotificacao("Erro ao carregar vendas da nuvem.", "error"));
       
