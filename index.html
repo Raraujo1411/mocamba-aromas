@@ -212,18 +212,10 @@ function registrarVenda() {
     return;
   }
 
-  // Usar a primeira chave encontrada por padrão (ou melhorar a lógica depois)
   const chaveUsada = chavesEncontradas[0];
   estoque[chaveUsada] = parseInt(estoque[chaveUsada]) || 0;
   estoque[chaveUsada] -= quantidade;
-  }
 
-  if (!chaveEncontrada) {
-    alert("Produto não encontrado no estoque!");
-    return;
-  }
-  estoque[chaveEncontrada] = parseInt(estoque[chaveEncontrada]) || 0;
-  estoque[chaveEncontrada] -= quantidade;
   const data = new Date().toLocaleDateString("pt-BR");
   vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
   if (vendas.length > 100) vendas.pop();
@@ -233,6 +225,8 @@ function registrarVenda() {
   atualizarTabela();
   atualizarVendas();
 }
+
+  
 
 function atualizarVendas() {
   const tbody = document.getElementById("tabelaVendas");
