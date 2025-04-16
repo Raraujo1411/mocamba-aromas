@@ -91,26 +91,31 @@
     </form>
 
     <h2>Adicionar Produto ao Estoque</h2>
-    <form>
+<form>
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 150px;">
       <label for="aroma">Aroma:</label>
-<select id="aroma">
-  <option value="Alecrim">Alecrim</option>
-  <option value="Baunilha">Baunilha</option>
-  <option value="Flor de Cerejeira">Flor de Cerejeira</option>
-  <option value="Lavanda">Lavanda</option>
-</select>
-
+      <select id="aroma">
+        <option value="Alecrim">Alecrim</option>
+        <option value="Baunilha">Baunilha</option>
+        <option value="Flor de Cerejeira">Flor de Cerejeira</option>
+        <option value="Lavanda">Lavanda</option>
+      </select>
+    </div>
+    <div style="flex: 1; min-width: 100px;">
       <label for="peso">Peso:</label>
       <select id="peso">
         <option value="100">100g</option>
         <option value="160">160g</option>
       </select>
-
+    </div>
+    <div style="flex: 1; min-width: 80px;">
       <label for="quantidade">Quantidade:</label>
       <input type="number" id="quantidade" min="1" />
-
-      <label for="local">Local:</label>
-      <input type="text" id="local" />
+    </div>
+  </div>
+  <label for="local">Local:</label>
+  <input type="text" id="local" />
 
       <button type="button" onclick="alterarEstoque(true)">Adicionar</button>
       <button type="button" onclick="alterarEstoque(false)">Remover</button>
@@ -306,19 +311,34 @@
     }
 
     function zerarEstoque() {
-      if (confirm("Tem certeza que deseja zerar o estoque?")) {
-        estoque = {};
+  const senha = prompt("Digite a senha para zerar o estoque:");
+  if (senha !== "1234") {
+    alert("Senha incorreta.");
+    return;
+  }
+  if (confirm("Tem certeza que deseja zerar o estoque?")) {
+    estoque = {};
+    atualizarTabela();
+    salvarEstoqueNaNuvem();
+  }
+};
         atualizarTabela();
         salvarEstoqueNaNuvem();
       }
     }
 
     function zerarVendas() {
-      if (confirm("Tem certeza que deseja apagar todas as vendas?")) {
-        vendas = [];
-        atualizarVendas();
-        salvarVendasNaNuvem();
-      }
+  const senha = prompt("Digite a senha para zerar as vendas:");
+  if (senha !== "1234") {
+    alert("Senha incorreta.");
+    return;
+  }
+  if (confirm("Tem certeza que deseja apagar todas as vendas?")) {
+    vendas = [];
+    atualizarVendas();
+    salvarVendasNaNuvem();
+  }
+}
     }
 
     async function iniciarApp() {
