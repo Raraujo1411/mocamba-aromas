@@ -216,20 +216,13 @@ function registrarVenda() {
   if (vendas.length > 100) vendas.pop();
 
   localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
-      atualizarTabela();
-      syncStatus.textContent = "Estoque sincronizado com sucesso.";
-      syncStatus.className = "fade-in success";
-      atualizarTabela();
   localStorage.setItem("vendasVelas", JSON.stringify(vendas));
-      atualizarVendas();
-      syncStatus.textContent = "Vendas sincronizadas com sucesso.";
-      syncStatus.className = "fade-in success";
-      atualizarVendas();
+
   atualizarTabela();
-      // status atualizado dentro do fluxo de resposta
   atualizarVendas();
-      document.getElementById("syncStatus").textContent = "Vendas sincronizadas com sucesso.";
-  salvarEstoqueNaNuvem();
+
+  mostrarNotificacao("Venda registrada e estoque atualizado com sucesso.");
+
   salvarVendasNaNuvem();
 }
 
@@ -246,6 +239,10 @@ function alterarEstoque(adicionar) {
 
   localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
   atualizarTabela();
+
+  const acao = adicionar ? "adicionado" : "removido";
+  mostrarNotificacao(`Produto ${acao} do estoque com sucesso.`);
+
   salvarEstoqueNaNuvem();
 }
 
@@ -337,6 +334,7 @@ function carregarEstoqueDaNuvem() {
 syncStatus.textContent = "Sincronizando estoque...";
 syncStatus.className = "fade-in";
   fetch(webAppURL + "?tipo=Estoque")
+    .catch(() => mostrarNotificacao("Erro ao carregar estoque da nuvem.", "error"))
     .then(res => res.json())
     .then(data => {
       if (!Array.isArray(data) || data.length === 0) return;
@@ -355,6 +353,7 @@ function carregarVendasDaNuvem() {
 syncStatus.textContent = "Sincronizando vendas...";
 syncStatus.className = "fade-in";
   fetch(webAppURL + "?tipo=Vendas")
+    .catch(() => mostrarNotificacao("Erro ao carregar vendas da nuvem.", "error"))
     .then(res => res.json())
     .then(data => {
       if (!Array.isArray(data) || data.length === 0) return;
@@ -373,8 +372,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("zerarEstoqueBtn").addEventListener("click", zerarEstoque);
   document.getElementById("zerarVendasBtn").addEventListener("click", zerarVendas);
 
-  localStorage.removeItem("estoqueVelas");
-  localStorage.removeItem("vendasVelas");
+  // localStorage.clear() removido para manter os dados entre recarregamentos
   carregarEstoqueDaNuvem();
   carregarVendasDaNuvem();
 });
@@ -387,6 +385,23 @@ setInterval(() => {
   carregarEstoqueDaNuvem();
   carregarVendasDaNuvem();
 }, 15000); // atualiza a cada 15 segundos
+function mostrarNotificacao(texto, tipo = 'success') {
+  const div = document.createElement('div');
+  div.textContent = texto;
+  div.className = `fade-in ${tipo}`;
+  div.style.position = 'fixed';
+  div.style.bottom = '20px';
+  div.style.left = '50%';
+  div.style.transform = 'translateX(-50%)';
+  div.style.padding = '10px 20px';
+  div.style.borderRadius = '8px';
+  div.style.background = tipo === 'success' ? '#dff0d8' : '#f8d7da';
+  div.style.color = tipo === 'success' ? '#3c763d' : '#842029';
+  div.style.boxShadow = '0 0 10px rgba(0,0,0,0.2)';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 4000);
+}
+
 </script>
 </body>
 </html>
