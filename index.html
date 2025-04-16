@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Moçamba Aromas - Estoque</title>
+  <title>Moçamba Aromas</title>
   <style>
     body {
       font-family: sans-serif;
-      background: #f0f0f0;
+      background: #f5f5f5;
       padding: 20px;
     }
     .container {
@@ -22,16 +22,16 @@
       text-align: center;
     }
     label {
-      margin-top: 10px;
       display: block;
       font-weight: bold;
+      margin-top: 10px;
     }
-    select, input, button {
+    input, select, button {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
       margin-bottom: 15px;
-      border-radius: 5px;
+      border-radius: 6px;
       border: 1px solid #ccc;
     }
     button {
@@ -43,15 +43,15 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 15px;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 10px;
+      padding: 8px;
       text-align: center;
     }
     th {
-      background: #eee;
+      background-color: #eee;
     }
     .negativo {
       background-color: #ffe5e5;
@@ -64,13 +64,31 @@
   <div class="container">
     <h1>Moçamba Aromas</h1>
 
-    <label><input type="checkbox" id="permitirNegativo" onchange="localStorage.setItem('estoqueNegativo', this.checked)"> Permitir estoque negativo</label>
+    <h2>Adicionar ou Remover Produto</h2>
+    <form id="estoqueForm">
+      <label for="aroma">Aroma:</label>
+      <select id="aroma">
+        <option value="Baunilha">Baunilha</option>
+        <option value="Lavanda">Lavanda</option>
+        <option value="Alecrim">Alecrim</option>
+        <option value="Flor de Cerejeira">Flor de Cerejeira</option>
+      </select>
+
+      <label for="peso">Peso:</label>
+      <select id="peso">
+        <option value="100">100g</option>
+        <option value="160">160g</option>
+      </select>
+
+      <label for="quantidade">Quantidade:</label>
+      <input type="number" id="quantidade" min="1" required />
+
+      <button type="button" onclick="alterarEstoque(true)">Adicionar</button>
+      <button type="button" onclick="alterarEstoque(false)">Remover</button>
+    </form>
 
     <h2>Registrar Venda</h2>
     <form id="vendaForm">
-      <label for="cliente">Cliente (opcional):</label>
-      <input type="text" id="cliente" placeholder="Nome do cliente" />
-
       <label for="vendaAroma">Aroma:</label>
       <select id="vendaAroma">
         <option value="Baunilha">Baunilha</option>
@@ -91,9 +109,18 @@
       <button type="button" onclick="registrarVenda()">Registrar Venda</button>
     </form>
 
+    <!-- Botões para zerar dados -->
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button onclick="zerarEstoque()" style="flex:1; background:red;">Zerar Estoque</button>
+      <button onclick="zerarVendas()" style="flex:1; background:darkred;">Zerar Vendas</button>
+    </div>
+
     <h2>Filtro de Vendas</h2>
-    <input type="text" id="filtroCliente" placeholder="Filtrar por cliente" oninput="atualizarVendas()" />
-    <input type="date" id="filtroData" oninput="atualizarVendas()" />
+    <label for="filtroDataInicio">Data Inicial:</label>
+    <input type="date" id="filtroDataInicio" oninput="atualizarVendas()" />
+
+    <label for="filtroDataFim">Data Final:</label>
+    <input type="date" id="filtroDataFim" oninput="atualizarVendas()" />
 
     <h2>Estoque Atual</h2>
     <table>
@@ -112,7 +139,6 @@
       <thead>
         <tr>
           <th>Data</th>
-          <th>Cliente</th>
           <th>Aroma</th>
           <th>Peso</th>
           <th>Qtd</th>
@@ -126,11 +152,20 @@
   <script>
     const estoque = JSON.parse(localStorage.getItem("estoqueVelas")) || {};
     const vendas = JSON.parse(localStorage.getItem("vendasVelas")) || [];
-    const permitirNegativo = localStorage.getItem("estoqueNegativo") === "true";
-    document.getElementById("permitirNegativo").checked = permitirNegativo;
+
+    function alterarEstoque(adicionar) {
+      const aroma = document.getElementById("aroma").value;
+      const peso = document.getElementById("peso").value;
+      const quantidade = parseInt(document.getElementById("quantidade").value);
+      const chave = `${aroma}_${peso}`;
+      estoque[chave] = parseInt(estoque[chave]) || 0;
+      estoque[chave] = adicionar ? estoque[chave] + quantidade : estoque[chave] - quantidade;
+
+      localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
+      atualizarTabela();
+    }
 
     function registrarVenda() {
-      const cliente = document.getElementById("cliente").value;
       const aroma = document.getElementById("vendaAroma").value;
       const peso = parseInt(document.getElementById("vendaPeso").value);
       const quantidade = parseInt(document.getElementById("vendaQuantidade").value);
@@ -139,17 +174,10 @@
       const chave = `${aroma}_${peso}`;
 
       estoque[chave] = parseInt(estoque[chave]) || 0;
-      const novoEstoque = estoque[chave] - quantidade;
+      estoque[chave] -= quantidade;
 
-      if (!permitirNegativo && novoEstoque < 0) {
-        alert("Estoque insuficiente para esta venda!");
-        return;
-      }
-
-      estoque[chave] = novoEstoque;
-
-      const data = new Date().toLocaleString("pt-BR");
-      vendas.unshift({ data, cliente, aroma, peso, quantidade, valorTotal });
+      const data = new Date().toLocaleDateString("pt-BR");
+      vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
       if (vendas.length > 100) vendas.pop();
 
       localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
@@ -171,18 +199,18 @@
 
     function atualizarVendas() {
       const tbody = document.getElementById("tabelaVendas");
-      const filtroCliente = document.getElementById("filtroCliente").value.toLowerCase();
-      const filtroData = document.getElementById("filtroData").value;
+      const dataInicio = document.getElementById("filtroDataInicio").value;
+      const dataFim = document.getElementById("filtroDataFim").value;
       tbody.innerHTML = "";
       vendas.forEach((venda) => {
+        const dataVenda = venda.data.split("/").reverse().join("-");
         if (
-          (filtroCliente && !venda.cliente?.toLowerCase().includes(filtroCliente)) ||
-          (filtroData && !venda.data.includes(filtroData))
+          (dataInicio && dataVenda < dataInicio) ||
+          (dataFim && dataVenda > dataFim)
         ) return;
 
         const row = `<tr>
           <td>${venda.data}</td>
-          <td>${venda.cliente || "-"}</td>
           <td>${venda.aroma}</td>
           <td>${venda.peso}g</td>
           <td>${venda.quantidade}</td>
@@ -192,48 +220,22 @@
       });
     }
 
+    function zerarEstoque() {
+      if (confirm("Tem certeza que deseja zerar o estoque?")) {
+        localStorage.removeItem("estoqueVelas");
+        location.reload();
+      }
+    }
+
+    function zerarVendas() {
+      if (confirm("Tem certeza que deseja apagar todas as vendas?")) {
+        localStorage.removeItem("vendasVelas");
+        location.reload();
+      }
+    }
+
     atualizarTabela();
     atualizarVendas();
-
-    // Botão de relatório por data
-    document.addEventListener("DOMContentLoaded", () => {
-      const relatorioBtn = document.createElement("button");
-      relatorioBtn.textContent = "Gerar Relatório por Data";
-      relatorioBtn.style.marginTop = "15px";
-      relatorioBtn.style.padding = "10px";
-      relatorioBtn.style.backgroundColor = "#388e3c";
-      relatorioBtn.style.color = "white";
-      relatorioBtn.style.border = "none";
-      relatorioBtn.style.borderRadius = "5px";
-      relatorioBtn.style.fontWeight = "bold";
-      relatorioBtn.onclick = () => {
-        const dataFiltro = prompt("Digite a data no formato DD/MM/AAAA:");
-        if (!dataFiltro) return;
-
-        const vendasFiltradas = vendas.filter(v => v.data.startsWith(dataFiltro));
-        if (vendasFiltradas.length === 0) {
-          alert("Nenhuma venda encontrada para essa data.");
-          return;
-        }
-
-        let totalDia = 0;
-        let relatorio = `Relatório de Vendas - ${dataFiltro}\n\n`;
-        relatorio += "Cliente\tAroma\tPeso\tQtd\tValor\n";
-        relatorio += "--------------------------------------------------\n";
-
-        vendasFiltradas.forEach(v => {
-          relatorio += `${v.cliente || '-'}\t${v.aroma}\t${v.peso}g\t${v.quantidade}\tR$ ${v.valorTotal.toFixed(2)}\n`;
-          totalDia += v.valorTotal;
-        });
-
-        relatorio += "--------------------------------------------------\n";
-        relatorio += `Total do Dia: R$ ${totalDia.toFixed(2)}`;
-
-        alert(relatorio);
-      };
-
-      document.body.appendChild(relatorioBtn);
-    });
   </script>
 </body>
 </html>
