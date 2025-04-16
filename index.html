@@ -158,7 +158,7 @@
     let vendas = [];
 
     async function carregarEstoqueDaNuvem() {
-  fetch(webAppURL + "?tipo=Estoque")
+  return fetch(webAppURL + "?tipo=Estoque")
     .then(res => res.json())
     .then(data => {
       estoque = {};
@@ -169,10 +169,11 @@
       localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
       atualizarTabela();
     });
+    });
     }
 
     async function carregarVendasDaNuvem() {
-  fetch(webAppURL + "?tipo=Vendas")
+  return fetch(webAppURL + "?tipo=Vendas")
     .then(res => res.json())
     .then(data => {
       vendas = data.map(([data, aroma, peso, qtd, valor]) => ({
@@ -180,6 +181,7 @@
       }));
       localStorage.setItem("vendasVelas", JSON.stringify(vendas));
       atualizarVendas();
+    });
     });
     }
 
@@ -311,8 +313,12 @@
       }
     }
 
-    carregarEstoqueDaNuvem();
-    carregarVendasDaNuvem();
+    async function iniciarApp() {
+  await carregarEstoqueDaNuvem();
+  await carregarVendasDaNuvem();
+}
+
+iniciarApp();
 
     setInterval(() => {
       carregarEstoqueDaNuvem();
