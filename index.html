@@ -208,6 +208,11 @@ function registrarVenda() {
     }
   }
 
+  if (!chaveEncontrada) {
+    alert("Produto não encontrado no estoque!");
+    return;
+  }
+  estoque[chaveEncontrada] = parseInt(estoque[chaveEncontrada]) || 0;
   estoque[chaveEncontrada] -= quantidade;
   const data = new Date().toLocaleDateString("pt-BR");
   vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
