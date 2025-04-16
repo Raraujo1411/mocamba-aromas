@@ -114,8 +114,14 @@
   <button type="button" onclick="alterarEstoque(true)">Adicionar</button>
   <button type="button" onclick="alterarEstoque(false)">Remover</button>
 </form>
-
-<div style="display:flex; gap:10px; margin-top:20px;">
+<div style="display:flex; flex-wrap: wrap; gap:10px; margin-top:20px;">
+  <button onclick="salvarEstoqueNaNuvem()" style="flex:1; background:#2196f3;">Salvar Estoque na Nuvem</button>
+  <button onclick="carregarEstoqueDaNuvem()" style="flex:1; background:#4caf50;">Carregar Estoque da Nuvem</button>
+  <button onclick="salvarVendasNaNuvem()" style="flex:1; background:#2196f3;">Salvar Vendas na Nuvem</button>
+  <button onclick="carregarVendasDaNuvem()" style="flex:1; background:#4caf50;">Carregar Vendas da Nuvem</button>rgin-top:20px;">
+  <button onclick="salvarEstoqueNaNuvem()" style="flex:1; background:#2196f3;">Salvar Estoque na Nuvem</button>
+  <button onclick="carregarEstoqueDaNuvem()" style="flex:1; background:#4caf50;">Carregar Estoque da Nuvem</button>
+  <button onclick="salvarVendasNaNuvem()" style="flex:1; background:#2196f3;">Salvar Vendas na Nuvem<
   <button onclick="zerarEstoque()" style="flex:1; background:red;">Zerar Estoque</button>
   <button onclick="zerarVendas()" style="flex:1; background:darkred;">Zerar Vendas</button>
 </div>
@@ -295,7 +301,61 @@ function atualizarTabela() {
 
   Object.entries(subtotaisPorLocal).forEach(([local, subtotal]) => {
     const row = `<tr style="background:#e0f7fa; font-weight:bold;">
-      <td colspan="2">Subtotal ${local}</td>
+      <td colspan="2">Subtotal $// ==== INTEGRAÇÃO COM GOOGLE SHEETS ====
+const webAppURL = "https://script.google.com/macros/s/AKfycbxWCJfGFajO2nNJmA7oU64MW-CF5cxYm8cGKZiIwUyxdoNXVuDzDkSPXCbycd0zltUr/exec";
+
+function salvarEstoqueNaNuvem() {
+  const dados = [];
+  for (const chave in estoque) {
+    if (chave === '_locais') continue;
+    const [aroma, peso, local] = chave.split("_");
+    const qtd = estoque[chave];
+    dados.push([aroma, peso, local, qtd]);
+  }
+  fetch(webAppURL + "?tipo=Estoque", {
+    method: "POST",
+    body: JSON.stringify(dados)
+  }).then(() => alert("Estoque salvo na nuvem!"));
+}
+
+function carregarEstoqueDaNuvem() {
+  fetch(webAppURL + "?tipo=Estoque")
+    .then(res => res.json())
+    .then(data => {
+      estoque = {};
+      estoque._locais = {};
+      data.forEach(([aroma, peso, local, qtd]) => {
+        const chave = `${aroma}_${peso}_${local}`;
+        estoque[chave] = parseInt(qtd);
+        estoque._locais[chave] = local;
+      });
+      localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
+      atualizarTabela();
+      alert("Estoque carregado da nuvem!");
+    });
+}
+
+function salvarVendasNaNuvem() {
+  const dados = vendas.map(v => [v.data, v.aroma, v.peso, v.quantidade, v.valorTotal]);
+  fetch(webAppURL + "?tipo=Vendas", {
+    method: "POST",
+    body: JSON.stringify(dados)
+  }).then(() => alert("Vendas salvas na nuvem!"));
+}
+
+function carregarVendasDaNuvem() {
+  fetch(webAppURL + "?tipo=Vendas")
+    .then(res => res.json())
+    .then(data => {
+      vendas = data.map(([data, aroma, peso, quantidade, valorTotal]) => ({
+        data, aroma, peso: parseInt(peso), quantidade: parseInt(quantidade), valorTotal: parseFloat(valorTotal)
+      }));
+      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
+      atualizarVendas();
+      alert("Vendas carregadas da nuvem!");
+    });
+}
+</script>td>
       <td>${subtotal.qtd}</td>
       <td>R$ ${subtotal.valor.toFixed(2)}</td>
       <td>${local}</td>
