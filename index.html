@@ -90,8 +90,6 @@
 
 <div class="container">
   <h2>Adicionar Produto ao Estoque</h2>
-
-<h2>Adicionar Produto ao Estoque</h2>
 <form id="estoqueForm">
   <label for="aroma">Aroma:</label>
   <select id="aroma">
@@ -167,7 +165,7 @@ function alterarEstoque(adicionar) {
   const peso = document.getElementById("peso").value;
   const quantidade = parseInt(document.getElementById("quantidade").value);
   const local = document.getElementById("local").value;
-  const chave = `${aroma}_${peso}`;
+  const chave = `${aroma}_${peso}_${local}`;
   estoque[chave] = parseInt(estoque[chave]) || 0;
   estoque[chave] = adicionar ? estoque[chave] + quantidade : estoque[chave] - quantidade;
 
