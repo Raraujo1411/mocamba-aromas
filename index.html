@@ -157,8 +157,8 @@
 </table>
 
 <script>
-const estoque = JSON.parse(localStorage.getItem("estoqueVelas")) || {};
-const vendas = JSON.parse(localStorage.getItem("vendasVelas")) || [];
+let estoque = JSON.parse(localStorage.getItem("estoqueVelas")) || {};
+let vendas = JSON.parse(localStorage.getItem("vendasVelas")) || [];
 
 function alterarEstoque(adicionar) {
   const aroma = document.getElementById("aroma").value;
@@ -178,15 +178,17 @@ function alterarEstoque(adicionar) {
 
 function zerarEstoque() {
   if (confirm("Tem certeza que deseja zerar o estoque?")) {
+    estoque = {};
     localStorage.removeItem("estoqueVelas");
-    location.reload();
+    atualizarTabela();
   }
 }
 
 function zerarVendas() {
   if (confirm("Tem certeza que deseja apagar todas as vendas?")) {
+    vendas = [];
     localStorage.removeItem("vendasVelas");
-    location.reload();
+    atualizarVendas();
   }
 }
 
@@ -197,20 +199,14 @@ function registrarVenda() {
   const valorUnitario = peso === 160 ? 65 : 45;
   const valorTotal = valorUnitario * quantidade;
 
-  // Tentar encontrar o primeiro local disponível com estoque suficiente
   let chaveEncontrada = null;
   for (const chave in estoque) {
     if (chave === '_locais') continue;
     const [a, p, l] = chave.split("_");
-    if (a === aroma && parseInt(p) === peso && estoque[chave] >= quantidade) {
+    if (a === aroma && parseInt(p) === peso) {
       chaveEncontrada = chave;
       break;
     }
-  }
-
-  if (!chaveEncontrada) {
-    alert("Estoque insuficiente para essa venda!");
-    return;
   }
 
   estoque[chaveEncontrada] -= quantidade;
@@ -264,9 +260,8 @@ function atualizarTabela() {
 
   for (const chave in estoque) {
     if (chave === '_locais') continue;
-    const [aroma, peso] = chave.split("_");
+    const [aroma, peso, local] = chave.split("_");
     const qtd = estoque[chave];
-    const local = locaisMap[chave] || '-';
     const valorUnitario = parseInt(peso) === 160 ? 65 : 45;
     const valor = valorUnitario * qtd;
 
@@ -280,8 +275,9 @@ function atualizarTabela() {
     totalVal += valor;
   }
 
+  const subtotaisPorLocal = {};
   Object.values(dadosAgrupados).forEach(item => {
-    const row = `<tr>
+    const row = `<tr class="${item.qtd < 0 ? 'negativo' : ''}">
       <td>${item.aroma}</td>
       <td>${item.peso}g</td>
       <td>${item.qtd}</td>
@@ -289,10 +285,25 @@ function atualizarTabela() {
       <td>${item.local}</td>
     </tr>`;
     tbody.innerHTML += row;
+
+    if (!subtotaisPorLocal[item.local]) {
+      subtotaisPorLocal[item.local] = { qtd: 0, valor: 0 };
+    }
+    subtotaisPorLocal[item.local].qtd += item.qtd;
+    subtotaisPorLocal[item.local].valor += item.valor;
+  });
+
+  Object.entries(subtotaisPorLocal).forEach(([local, subtotal]) => {
+    const row = `<tr style="background:#e0f7fa; font-weight:bold;">
+      <td colspan="2">Subtotal ${local}</td>
+      <td>${subtotal.qtd}</td>
+      <td>R$ ${subtotal.valor.toFixed(2)}</td>
+      <td>${local}</td>
+    </tr>`;
+    tbody.innerHTML += row;
   });
 
   document.getElementById("totalQtd").textContent = totalQtd;
-  document.getElementById("totalVal").textContent = `R$ ${totalVal.toFixed(2)}`;.textContent = totalQtd;
   document.getElementById("totalVal").textContent = `R$ ${totalVal.toFixed(2)}`;
 }
 
