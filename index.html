@@ -65,6 +65,19 @@
       margin-top: 10px;
       transition: opacity 0.3s ease;
     }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
 </style>
 </head>
 <body>
@@ -204,12 +217,16 @@ function registrarVenda() {
 
   localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
       atualizarTabela();
-      document.getElementById("syncStatus").textContent = "Estoque sincronizado com sucesso.";
+      syncStatus.textContent = "Estoque sincronizado com sucesso.";
+      syncStatus.className = "fade-in success";
+      atualizarTabela();
   localStorage.setItem("vendasVelas", JSON.stringify(vendas));
       atualizarVendas();
-      document.getElementById("syncStatus").textContent = "Vendas sincronizadas com sucesso.";
+      syncStatus.textContent = "Vendas sincronizadas com sucesso.";
+      syncStatus.className = "fade-in success";
+      atualizarVendas();
   atualizarTabela();
-      document.getElementById("syncStatus").textContent = "Estoque sincronizado com sucesso.";
+      // status atualizado dentro do fluxo de resposta
   atualizarVendas();
       document.getElementById("syncStatus").textContent = "Vendas sincronizadas com sucesso.";
   salvarEstoqueNaNuvem();
@@ -316,7 +333,9 @@ function salvarVendasNaNuvem() {
 }
 
 function carregarEstoqueDaNuvem() {
-  document.getElementById("syncStatus").textContent = "Sincronizando estoque...";
+  const syncStatus = document.getElementById("syncStatus");
+syncStatus.textContent = "Sincronizando estoque...";
+syncStatus.className = "fade-in";
   fetch(webAppURL + "?tipo=Estoque")
     .then(res => res.json())
     .then(data => {
@@ -332,7 +351,9 @@ function carregarEstoqueDaNuvem() {
 }
 
 function carregarVendasDaNuvem() {
-  document.getElementById("syncStatus").textContent = "Sincronizando vendas...";
+  const syncStatus = document.getElementById("syncStatus");
+syncStatus.textContent = "Sincronizando vendas...";
+syncStatus.className = "fade-in";
   fetch(webAppURL + "?tipo=Vendas")
     .then(res => res.json())
     .then(data => {
@@ -352,11 +373,6 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("zerarEstoqueBtn").addEventListener("click", zerarEstoque);
   document.getElementById("zerarVendasBtn").addEventListener("click", zerarVendas);
 
-  carregarEstoqueDaNuvem();
-  carregarVendasDaNuvem();
-  atualizarTabela();
-  atualizarVendas();
-  document.getElementById("syncStatus").textContent = "Dados sincronizados com sucesso.";
   carregarEstoqueDaNuvem();
   carregarVendasDaNuvem();
 });
