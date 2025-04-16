@@ -158,23 +158,29 @@
     let vendas = [];
 
     async function carregarEstoqueDaNuvem() {
-      const res = await fetch(webAppURL + "?tipo=Estoque");
-      const data = await res.json();
+  fetch(webAppURL + "?tipo=Estoque")
+    .then(res => res.json())
+    .then(data => {
       estoque = {};
       data.forEach(([aroma, peso, local, qtd]) => {
         const chave = `${aroma}_${peso}_${local}`;
         estoque[chave] = parseInt(qtd);
       });
+      localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
       atualizarTabela();
+    });
     }
 
     async function carregarVendasDaNuvem() {
-      const res = await fetch(webAppURL + "?tipo=Vendas");
-      const data = await res.json();
+  fetch(webAppURL + "?tipo=Vendas")
+    .then(res => res.json())
+    .then(data => {
       vendas = data.map(([data, aroma, peso, qtd, valor]) => ({
         data, aroma, peso, quantidade: parseInt(qtd), valorTotal: parseFloat(valor)
       }));
+      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
       atualizarVendas();
+    });
     }
 
     function salvarEstoqueNaNuvem() {
@@ -217,33 +223,34 @@
     }
 
     function registrarVenda() {
-      const aroma = document.getElementById("vendaAroma").value;
-      const peso = parseInt(document.getElementById("vendaPeso").value);
-      const quantidadeInput = document.getElementById("vendaQuantidade").value;
+  const aroma = document.getElementById("vendaAroma").value;
+  const peso = parseInt(document.getElementById("vendaPeso").value);
+  const quantidadeInput = document.getElementById("vendaQuantidade").value;
 
-      if (!quantidadeInput || isNaN(quantidadeInput) || parseInt(quantidadeInput) <= 0) {
-        alert("Quantidade não informada.");
-        return;
-      }
+  if (!quantidadeInput || isNaN(quantidadeInput) || parseInt(quantidadeInput) <= 0) {
+    alert("Quantidade não informada.");
+    return;
+  }
 
-      const quantidade = parseInt(quantidadeInput);
-      const valorUnit = peso === 160 ? 65 : 45;
-      const valorTotal = valorUnit * quantidade;
+  const quantidade = parseInt(quantidadeInput);
+  const valorUnit = peso === 160 ? 65 : 45;
+  const valorTotal = valorUnit * quantidade;
 
-      const chave = Object.keys(estoque).find(k => k.startsWith(`${aroma}_${peso}_`));
-      if (!chave) {
-        alert("Produto não encontrado no estoque. A venda ainda será registrada com estoque negativo.");
-        return;
-      }
+  let chave = Object.keys(estoque).find(k => k.startsWith(`${aroma}_${peso}_`));
+  if (!chave) {
+    const local = "Indefinido";
+    chave = `${aroma}_${peso}_${local}`;
+    estoque[chave] = 0;
+  }
 
-      estoque[chave] = (estoque[chave] || 0) - quantidade;
+  estoque[chave] -= quantidade;
 
-      const data = new Date().toLocaleDateString("pt-BR");
-      vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
-      atualizarTabela();
-      atualizarVendas();
-      salvarEstoqueNaNuvem();
-      salvarVendasNaNuvem();
+  const data = new Date().toLocaleDateString("pt-BR");
+  vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
+  atualizarTabela();
+  atualizarVendas();
+  salvarEstoqueNaNuvem();
+  salvarVendasNaNuvem();
     }
 
     function atualizarTabela() {
