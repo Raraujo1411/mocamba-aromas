@@ -313,6 +313,12 @@ function atualizarTabela() {
 atualizarTabela();
 atualizarVendas();
 // ==== INTEGRAÇÃO COM GOOGLE SHEETS ====
+
+// Agendamento automático a cada 30 minutos (1800000 ms)
+setInterval(() => {
+  salvarEstoqueNaNuvem();
+  salvarVendasNaNuvem();
+}, 900000); // 15 minutos
 const webAppURL = "https://script.google.com/macros/s/AKfycbxWCJfGFajO2nNJmA7oU64MW-CF5cxYm8cGKZiIwUyxdoNXVuDzDkSPXCbycd0zltUr/exec";
 
 function salvarEstoqueNaNuvem() {
@@ -336,6 +342,7 @@ function carregarEstoqueDaNuvem() {
       estoque = {};
       estoque._locais = {};
       data.forEach(([aroma, peso, local, qtd]) => {
+        if (!aroma || !peso || !local || isNaN(qtd)) return;
         const chave = `${aroma}_${peso}_${local}`;
         estoque[chave] = parseInt(qtd);
         estoque._locais[chave] = local;
