@@ -173,6 +173,7 @@ function alterarEstoque(adicionar) {
 
   localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
   atualizarTabela();
+  salvarEstoqueNaNuvem();
 }
 
 function zerarEstoque() {
@@ -180,6 +181,7 @@ function zerarEstoque() {
     estoque = {};
     localStorage.removeItem("estoqueVelas");
     atualizarTabela();
+    salvarEstoqueNaNuvem();
   }
 }
 
@@ -188,6 +190,7 @@ function zerarVendas() {
     vendas = [];
     localStorage.removeItem("vendasVelas");
     atualizarVendas();
+    salvarVendasNaNuvem();
   }
 }
 
@@ -224,9 +227,9 @@ function registrarVenda() {
   localStorage.setItem("vendasVelas", JSON.stringify(vendas));
   atualizarTabela();
   atualizarVendas();
+  salvarEstoqueNaNuvem();
+  salvarVendasNaNuvem();
 }
-
-  
 
 function atualizarVendas() {
   const tbody = document.getElementById("tabelaVendas");
@@ -317,13 +320,16 @@ function atualizarTabela() {
 
 atualizarTabela();
 atualizarVendas();
+carregarEstoqueDaNuvem();
+carregarVendasDaNuvem();
+
 // ==== INTEGRAÇÃO COM GOOGLE SHEETS ====
 
-// Agendamento automático a cada 30 minutos (1800000 ms)
 setInterval(() => {
   salvarEstoqueNaNuvem();
   salvarVendasNaNuvem();
 }, 900000); // 15 minutos
+
 const webAppURL = "https://script.google.com/macros/s/AKfycbxWCJfGFajO2nNJmA7oU64MW-CF5cxYm8cGKZiIwUyxdoNXVuDzDkSPXCbycd0zltUr/exec";
 
 function salvarEstoqueNaNuvem() {
@@ -337,7 +343,7 @@ function salvarEstoqueNaNuvem() {
   fetch(webAppURL + "?tipo=Estoque", {
     method: "POST",
     body: JSON.stringify(dados)
-  }).then(() => alert("Estoque salvo na nuvem!"));
+  });
 }
 
 function carregarEstoqueDaNuvem() {
@@ -354,7 +360,6 @@ function carregarEstoqueDaNuvem() {
       });
       localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
       atualizarTabela();
-      alert("Estoque carregado da nuvem!");
     });
 }
 
@@ -363,7 +368,7 @@ function salvarVendasNaNuvem() {
   fetch(webAppURL + "?tipo=Vendas", {
     method: "POST",
     body: JSON.stringify(dados)
-  }).then(() => alert("Vendas salvas na nuvem!"));
+  });
 }
 
 function carregarVendasDaNuvem() {
@@ -375,7 +380,6 @@ function carregarVendasDaNuvem() {
       }));
       localStorage.setItem("vendasVelas", JSON.stringify(vendas));
       atualizarVendas();
-      alert("Vendas carregadas da nuvem!");
     });
 }
 </script>
