@@ -58,10 +58,18 @@
       color: red;
       font-weight: bold;
     }
-  </style>
+      #syncStatus {
+      text-align: center;
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 10px;
+      transition: opacity 0.3s ease;
+    }
+</style>
 </head>
 <body>
   <div class="container">
+    <div id="syncStatus">Sincronizando com a nuvem...</div>
     <h1>Moçamba Aromas</h1>
     <h2>Registrar Venda</h2>
     <form>
@@ -197,7 +205,9 @@ function registrarVenda() {
   localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
   localStorage.setItem("vendasVelas", JSON.stringify(vendas));
   atualizarTabela();
+      document.getElementById("syncStatus").textContent = "Estoque sincronizado com sucesso.";
   atualizarVendas();
+      document.getElementById("syncStatus").textContent = "Vendas sincronizadas com sucesso.";
   salvarEstoqueNaNuvem();
   salvarVendasNaNuvem();
 }
@@ -302,9 +312,11 @@ function salvarVendasNaNuvem() {
 }
 
 function carregarEstoqueDaNuvem() {
+  document.getElementById("syncStatus").textContent = "Sincronizando estoque...";
   fetch(webAppURL + "?tipo=Estoque")
     .then(res => res.json())
     .then(data => {
+      if (!Array.isArray(data) || data.length === 0) return;
       estoque = {};
       data.forEach(([aroma, peso, local, qtd]) => {
         const chave = `${aroma}_${peso}_${local}`;
@@ -316,9 +328,11 @@ function carregarEstoqueDaNuvem() {
 }
 
 function carregarVendasDaNuvem() {
+  document.getElementById("syncStatus").textContent = "Sincronizando vendas...";
   fetch(webAppURL + "?tipo=Vendas")
     .then(res => res.json())
     .then(data => {
+      if (!Array.isArray(data) || data.length === 0) return;
       vendas = data.map(([data, aroma, peso, quantidade, valorTotal]) => ({
         data, aroma, peso, quantidade: parseInt(quantidade), valorTotal: parseFloat(valorTotal)
       }));
