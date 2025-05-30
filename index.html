@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -58,7 +59,7 @@
       color: red;
       font-weight: bold;
     }
-      #syncStatus {
+    #syncStatus {
       text-align: center;
       font-size: 0.9em;
       color: #555;
@@ -78,7 +79,7 @@
     .error {
       color: red;
     }
-</style>
+  </style>
 </head>
 <body>
   <div class="container">
@@ -193,6 +194,9 @@
     </div>
 
   </div>
+</body>
+<!-- O script corrigido será inserido aqui -->
+
 <script>
 const webAppURL = "https://script.google.com/macros/s/AKfycbyWq5Cn6RcdF8kkqRfZCOIiybzTTj6Na1QlkYz4tu_nRpL67JfGSDx6vIE50FQCDZ44/exec";
 let estoque = JSON.parse(localStorage.getItem("estoqueVelas")) || {};
@@ -223,10 +227,8 @@ function registrarVenda() {
   localStorage.setItem("vendasVelas", JSON.stringify(vendas));
 
   atualizarTabela();
-      mostrarNotificacao("Estoque sincronizado com sucesso.");
-  atualizarVendas();
-
   mostrarNotificacao("Venda registrada e estoque atualizado com sucesso.");
+  atualizarVendas();
 
   salvarVendasNaNuvem();
   salvarEstoqueNaNuvem();
@@ -276,7 +278,6 @@ function zerarVendas() {
     carregarVendasDaNuvem();
     mostrarNotificacao("Histórico de vendas zerado com sucesso.");
   }
-}
 }
 
 function atualizarTabela() {
@@ -329,7 +330,9 @@ function salvarEstoqueNaNuvem() {
   fetch(webAppURL + "?tipo=Estoque", {
     method: "POST",
     body: JSON.stringify(dados)
-  });
+  }).then(res => {
+    if (!res.ok) throw new Error("Erro ao salvar estoque");
+  }).catch(() => mostrarNotificacao("Erro ao salvar estoque na nuvem.", "error"));
 }
 
 function salvarVendasNaNuvem() {
@@ -337,7 +340,9 @@ function salvarVendasNaNuvem() {
   fetch(webAppURL + "?tipo=Vendas", {
     method: "POST",
     body: JSON.stringify(dados)
-  });
+  }).then(res => {
+    if (!res.ok) throw new Error("Erro ao salvar vendas");
+  }).catch(() => mostrarNotificacao("Erro ao salvar vendas na nuvem.", "error"));
 }
 
 function carregarEstoqueDaNuvem() {
@@ -363,7 +368,8 @@ function carregarEstoqueDaNuvem() {
       localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
       atualizarTabela();
       mostrarNotificacao("Estoque sincronizado com sucesso.");
-    });
+    })
+    .catch(() => mostrarNotificacao("Erro ao carregar estoque da nuvem.", "error"));
 }
 
 function carregarVendasDaNuvem() {
@@ -381,17 +387,21 @@ function carregarVendasDaNuvem() {
         mostrarNotificacao("Nenhuma venda encontrada na nuvem.", "error");
         return;
       }
+
       vendas = data.map(([data, aroma, peso, quantidade, valorTotal]) => ({
-        data, aroma, peso, quantidade: parseInt(quantidade), valorTotal: parseFloat(valorTotal)
+        data,
+        aroma,
+        peso,
+        quantidade: parseInt(quantidade),
+        valorTotal: parseFloat(valorTotal)
       }));
+
       localStorage.setItem("vendasVelas", JSON.stringify(vendas));
       atualizarVendas();
       mostrarNotificacao("Vendas sincronizadas com sucesso.");
     })
-    .catch(() => mostrarNotificacao("Erro ao carregar vendas da nuvem.", "error"));
-    })
-    .catch(() => mostrarNotificacao("Erro ao carregar vendas da nuvem.", "error"));
-      
+    .catch(() => {
+      mostrarNotificacao("Erro ao carregar vendas da nuvem.", "error");
     });
 }
 
@@ -402,10 +412,10 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("zerarEstoqueBtn").addEventListener("click", zerarEstoque);
   document.getElementById("zerarVendasBtn").addEventListener("click", zerarVendas);
 
-  // localStorage.clear() removido para manter os dados entre recarregamentos
   carregarEstoqueDaNuvem();
   carregarVendasDaNuvem();
 });
+
 window.addEventListener("focus", () => {
   carregarEstoqueDaNuvem();
   carregarVendasDaNuvem();
@@ -414,7 +424,8 @@ window.addEventListener("focus", () => {
 setInterval(() => {
   carregarEstoqueDaNuvem();
   carregarVendasDaNuvem();
-}, 15000); // atualiza a cada 15 segundos
+}, 15000);
+
 function mostrarNotificacao(texto, tipo = 'success') {
   const div = document.createElement('div');
   div.textContent = texto;
@@ -431,7 +442,6 @@ function mostrarNotificacao(texto, tipo = 'success') {
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 4000);
 }
-
 </script>
-</body>
+
 </html>
