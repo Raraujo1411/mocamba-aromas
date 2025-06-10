@@ -1,447 +1,251 @@
-
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Moçamba Aromas</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    label {
-      display: block;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      margin-bottom: 15px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #5c6bc0;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background-color: #eee;
-    }
-    .negativo {
-      background-color: #ffe5e5;
-      color: red;
-      font-weight: bold;
-    }
-    #syncStatus {
-      text-align: center;
-      font-size: 0.9em;
-      color: #555;
-      margin-top: 10px;
-      transition: opacity 0.3s ease;
-    }
-    .fade-in {
-      animation: fadeIn 0.5s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .success {
-      color: green;
-    }
-    .error {
-      color: red;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div id="syncStatus">Sincronizando com a nuvem...</div>
-    <h1>Moçamba Aromas</h1>
-    <h2>Registrar Venda</h2>
-    <form>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 150px;">
-          <label for="vendaAroma">Aroma:</label>
-          <select id="vendaAroma">
-            <option value="Alecrim">Alecrim</option>
-            <option value="Baunilha">Baunilha</option>
-            <option value="Flor de Cerejeira">Flor de Cerejeira</option>
-            <option value="Lavanda">Lavanda</option>
-          </select>
-        </div>
-        <div style="flex: 1; min-width: 100px;">
-          <label for="vendaPeso">Peso:</label>
-          <select id="vendaPeso">
-            <option value="100">100g</option>
-            <option value="160">160g</option>
-          </select>
-        </div>
-        <div style="flex: 1; min-width: 80px;">
-          <label for="vendaQuantidade">Quantidade:</label>
-          <input type="number" id="vendaQuantidade" min="1" />
-        </div>
-      </div>
-      <button type="button" id="registrarBtn">Registrar Venda</button>
-    </form>
-
-    <h2>Adicionar Produto ao Estoque</h2>
-    <form>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 150px;">
-          <label for="aroma">Aroma:</label>
-          <select id="aroma">
-            <option value="Alecrim">Alecrim</option>
-            <option value="Baunilha">Baunilha</option>
-            <option value="Flor de Cerejeira">Flor de Cerejeira</option>
-            <option value="Lavanda">Lavanda</option>
-          </select>
-        </div>
-        <div style="flex: 1; min-width: 100px;">
-          <label for="peso">Peso:</label>
-          <select id="peso">
-            <option value="100">100g</option>
-            <option value="160">160g</option>
-          </select>
-        </div>
-        <div style="flex: 1; min-width: 80px;">
-          <label for="quantidade">Quantidade:</label>
-          <input type="number" id="quantidade" min="1" />
-        </div>
-      </div>
-      <label for="local">Local:</label>
-      <input type="text" id="local" />
-
-      <div style="display: flex; gap: 10px;">
-        <button type="button" id="adicionarBtn" style="flex: 1;">Adicionar</button>
-        <button type="button" id="removerBtn" style="flex: 1;">Remover</button>
-      </div>
-    </form>
-
-    <h2>Estoque Atual</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Aroma</th>
-          <th>Peso</th>
-          <th>Quantidade</th>
-          <th>Valor (R$)</th>
-          <th>Local</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaEstoque"></tbody>
-      <tfoot>
-        <tr style="font-weight:bold; background:#f0f0f0">
-          <td colspan="2">Totais</td>
-          <td id="totalQtd"></td>
-          <td id="totalVal"></td>
-          <td>-</td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <h2>Histórico de Vendas</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Aroma</th>
-          <th>Peso</th>
-          <th>Qtd</th>
-          <th>Valor (R$)</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaVendas"></tbody>
-      <tfoot>
-        <tr style="font-weight:bold; background:#f0f0f0">
-          <td colspan="3">Total</td>
-          <td id="totalQtdVendas"></td>
-          <td id="totalValVendas"></td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <div style="display: flex; gap: 10px; margin-top: 20px;">
-      <button id="zerarEstoqueBtn" style="background:red; flex: 1; max-width: 200px;">Zerar Estoque</button>
-      <button id="zerarVendasBtn" style="background:darkred; flex: 1; max-width: 200px;">Zerar Vendas</button>
-    </div>
-
-  </div>
-</body>
-<!-- O script corrigido será inserido aqui -->
-
 <script>
-const webAppURL = "https://script.google.com/macros/s/AKfycbyWq5Cn6RcdF8kkqRfZCOIiybzTTj6Na1QlkYz4tu_nRpL67JfGSDx6vIE50FQCDZ44/exec";
+const webAppURL = "https://script.google.com/macros/s/SEU_SCRIPT_URL/exec";
 let estoque = JSON.parse(localStorage.getItem("estoqueVelas")) || {};
 let vendas = JSON.parse(localStorage.getItem("vendasVelas")) || [];
 
-function registrarVenda() {
-  const aroma = document.getElementById("vendaAroma").value;
-  const peso = parseInt(document.getElementById("vendaPeso").value);
-  const quantidade = parseInt(document.getElementById("vendaQuantidade").value);
-  if (!quantidade || quantidade <= 0) return alert("Quantidade não informada");
+function alterarEstoque(adicionar) {
+  const aroma = document.getElementById("aroma").value.trim();
+  const quantidadeInput = document.getElementById("quantidade").value;
+  const local = document.getElementById("local").value.trim();
 
-  const valorUnitario = peso === 160 ? 65 : 45;
+  if (!quantidadeInput || isNaN(parseInt(quantidadeInput))) {
+    alert("Quantidade não informada");
+    return;
+  }
+  if (!aroma || !local) {
+    alert("Todos os campos devem ser preenchidos corretamente.");
+    return;
+  }
+
+  const quantidade = parseInt(quantidadeInput);
+  const chave = `${aroma}_${local}`;
+  estoque[chave] = parseInt(estoque[chave]) || 0;
+  estoque[chave] = adicionar ? estoque[chave] + quantidade : estoque[chave] - quantidade;
+
+  if (!estoque._locais) estoque._locais = {};
+  estoque._locais[chave] = local;
+
+  localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
+  atualizarTabela();
+  salvarEstoqueNaNuvem();
+}
+
+function registrarVenda() {
+  const aroma = document.getElementById("vendaAroma").value.trim();
+  const quantidadeInput = document.getElementById("vendaQuantidade").value;
+
+  if (!quantidadeInput || isNaN(parseInt(quantidadeInput))) {
+    alert("Quantidade não informada");
+    return;
+  }
+  if (!aroma) {
+    alert("Aroma deve ser selecionado corretamente.");
+    return;
+  }
+
+  const quantidade = parseInt(quantidadeInput);
+  const valorUnitario = aroma.includes("160gr") ? 65 : (aroma.includes("100gr") ? 45 : 0);
   const valorTotal = valorUnitario * quantidade;
 
-  const chaves = Object.keys(estoque).filter(k => k.startsWith(`${aroma}_${peso}_`));
-  let chave = chaves[0];
-  if (!chave) {
-    chave = `${aroma}_${peso}_GERACAO VITAL`;
-    if (!estoque[chave]) estoque[chave] = 0;
+  let chavesEncontradas = [];
+  for (const chave in estoque) {
+    if (chave === '_locais') continue;
+    const [a, l] = chave.split("_");
+    if (a === aroma) {
+      chavesEncontradas.push(chave);
+    }
   }
-  estoque[chave] -= quantidade;
+
+  if (chavesEncontradas.length === 0) {
+    alert("Produto não encontrado no estoque!");
+    return;
+  }
+
+  const chaveUsada = chavesEncontradas[0];
+  estoque[chaveUsada] = parseInt(estoque[chaveUsada]) || 0;
+  estoque[chaveUsada] -= quantidade;
 
   const data = new Date().toLocaleDateString("pt-BR");
-  vendas.unshift({ data, aroma, peso, quantidade, valorTotal });
+  vendas.unshift({ data, aroma, quantidade, valorTotal });
   if (vendas.length > 100) vendas.pop();
 
   localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
   localStorage.setItem("vendasVelas", JSON.stringify(vendas));
-
   atualizarTabela();
-  mostrarNotificacao("Venda registrada e estoque atualizado com sucesso.");
   atualizarVendas();
-
+  salvarEstoqueNaNuvem();
   salvarVendasNaNuvem();
-  salvarEstoqueNaNuvem();
 }
 
-function alterarEstoque(adicionar) {
-  const aroma = document.getElementById("aroma").value;
-  const peso = document.getElementById("peso").value;
-  const quantidade = parseInt(document.getElementById("quantidade").value);
-  let local = document.getElementById("local").value.trim() || "GERACAO VITAL";
-  if (!quantidade || quantidade <= 0) return alert("Quantidade não informada");
-
-  const chave = `${aroma}_${peso}_${local}`;
-  estoque[chave] = estoque[chave] || 0;
-  estoque[chave] = adicionar ? estoque[chave] + quantidade : estoque[chave] - quantidade;
-
-  localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
-  atualizarTabela();
-
-  const acao = adicionar ? "adicionado" : "removido";
-  mostrarNotificacao(`Produto ${acao} do estoque com sucesso.`);
-
-  salvarEstoqueNaNuvem();
-}
-
-function zerarEstoque() {
-  const senha = prompt("Digite a senha para zerar o estoque:");
-  if (senha !== "1234") return alert("Senha incorreta.");
-  if (confirm("Tem certeza que deseja zerar o estoque?")) {
-    estoque = {};
-    localStorage.removeItem("estoqueVelas");
-    atualizarTabela();
-    salvarEstoqueNaNuvem();
-    carregarEstoqueDaNuvem();
-    mostrarNotificacao("Estoque zerado com sucesso.");
-  }
-}
-
-function zerarVendas() {
-  const senha = prompt("Digite a senha para zerar as vendas:");
-  if (senha !== "1234") return alert("Senha incorreta.");
-  if (confirm("Tem certeza que deseja apagar todas as vendas?")) {
-    vendas = [];
-    localStorage.removeItem("vendasVelas");
-    atualizarVendas();
-    salvarVendasNaNuvem();
-    carregarVendasDaNuvem();
-    mostrarNotificacao("Histórico de vendas zerado com sucesso.");
-  }
-}
-
+<script>
 function atualizarTabela() {
   const tbody = document.getElementById("tabelaEstoque");
   tbody.innerHTML = "";
   let totalQtd = 0;
   let totalVal = 0;
-  Object.entries(estoque).forEach(([chave, qtd]) => {
-    const [aroma, peso, local] = chave.split("_");
-    const valor = qtd * (parseInt(peso) === 160 ? 65 : 45);
+
+  const locaisMap = estoque._locais || {};
+  const dadosAgrupados = {};
+
+  for (const chave in estoque) {
+    if (chave === '_locais') continue;
+    const [aroma, local] = chave.split("_");
+    const qtd = estoque[chave];
+    const valorUnitario = aroma.includes("160gr") ? 65 : (aroma.includes("100gr") ? 45 : 0);
+    const valor = valorUnitario * qtd;
+
+    const id = `${aroma}_${local}`;
+    if (!dadosAgrupados[id]) {
+      dadosAgrupados[id] = { aroma, local, qtd: 0, valor: 0 };
+    }
+    dadosAgrupados[id].qtd += qtd;
+    dadosAgrupados[id].valor += valor;
     totalQtd += qtd;
     totalVal += valor;
-    tbody.innerHTML += `<tr class="${qtd < 0 ? 'negativo' : ''}">
-      <td>${aroma}</td>
-      <td>${peso}g</td>
-      <td>${qtd}</td>
-      <td>R$ ${valor.toFixed(2)}</td>
+  }
+
+  const subtotaisPorLocal = {};
+  Object.values(dadosAgrupados)
+    .sort((a, b) => a.aroma.localeCompare(b.aroma))
+    .forEach(item => {
+      const row = `<tr class="${item.qtd < 0 ? 'negativo' : ''}">
+        <td>${item.aroma}</td>
+        <td>${item.qtd}</td>
+        <td>R$ ${item.valor.toFixed(2)}</td>
+        <td>${item.local}</td>
+      </tr>`;
+      tbody.innerHTML += row;
+
+      if (!subtotaisPorLocal[item.local]) {
+        subtotaisPorLocal[item.local] = { qtd: 0, valor: 0 };
+      }
+      subtotaisPorLocal[item.local].qtd += item.qtd;
+      subtotaisPorLocal[item.local].valor += item.valor;
+    });
+
+  Object.entries(subtotaisPorLocal).forEach(([local, subtotal]) => {
+    const row = `<tr style="background:#e0f7fa; font-weight:bold;">
+      <td colspan="1">Subtotal ${local}</td>
+      <td>${subtotal.qtd}</td>
+      <td>R$ ${subtotal.valor.toFixed(2)}</td>
       <td>${local}</td>
     </tr>`;
+    tbody.innerHTML += row;
   });
+
   document.getElementById("totalQtd").textContent = totalQtd;
-  document.getElementById("totalVal").textContent = "R$ " + totalVal.toFixed(2);
+  document.getElementById("totalVal").textContent = `R$ ${totalVal.toFixed(2)}`;
 }
 
 function atualizarVendas() {
   const tbody = document.getElementById("tabelaVendas");
   tbody.innerHTML = "";
+
   let totalQtd = 0;
-  let totalVal = 0;
-  vendas.forEach(v => {
-    totalQtd += v.quantidade;
-    totalVal += v.valorTotal;
-    tbody.innerHTML += `<tr>
-      <td>${v.data}</td>
-      <td>${v.aroma}</td>
-      <td>${v.peso}g</td>
-      <td>${v.quantidade}</td>
-      <td>R$ ${v.valorTotal.toFixed(2)}</td>
-    </tr>`;
-  });
-  document.getElementById("totalQtdVendas").textContent = totalQtd;
-  document.getElementById("totalValVendas").textContent = "R$ " + totalVal.toFixed(2);
+  let totalValor = 0;
+
+  vendas
+    .slice()
+    .sort((a, b) => a.aroma.localeCompare(b.aroma))
+    .forEach((venda) => {
+      totalQtd += venda.quantidade;
+      totalValor += venda.valorTotal;
+
+      const row = `<tr>
+        <td>${venda.data}</td>
+        <td>${venda.aroma}</td>
+        <td>${venda.quantidade}</td>
+        <td>R$ ${venda.valorTotal.toFixed(2)}</td>
+      </tr>`;
+      tbody.innerHTML += row;
+    });
+
+  const totalRow = `<tr style="font-weight:bold; background:#f0f0f0">
+    <td colspan="2">Total</td>
+    <td>${totalQtd}</td>
+    <td>R$ ${totalValor.toFixed(2)}</td>
+  </tr>`;
+  tbody.innerHTML += totalRow;
+}
+
+function zerarEstoque() {
+  if (confirm("Tem certeza que deseja zerar o estoque?")) {
+    estoque = {};
+    localStorage.removeItem("estoqueVelas");
+    atualizarTabela();
+    salvarEstoqueNaNuvem();
+  }
+}
+
+function zerarVendas() {
+  if (confirm("Tem certeza que deseja apagar todas as vendas?")) {
+    vendas = [];
+    localStorage.removeItem("vendasVelas");
+    atualizarVendas();
+    salvarVendasNaNuvem();
+  }
 }
 
 function salvarEstoqueNaNuvem() {
-  const dados = Object.entries(estoque).map(([k, qtd]) => {
-    const [aroma, peso, local] = k.split("_");
-    return [aroma, peso, local, qtd];
-  });
+  const dados = [];
+  for (const chave in estoque) {
+    if (chave === '_locais') continue;
+    const [aroma, local] = chave.split("_");
+    const qtd = estoque[chave];
+    dados.push([aroma, local, qtd]);
+  }
   fetch(webAppURL + "?tipo=Estoque", {
     method: "POST",
     body: JSON.stringify(dados)
-  }).then(res => {
-    if (!res.ok) throw new Error("Erro ao salvar estoque");
-  }).catch(() => mostrarNotificacao("Erro ao salvar estoque na nuvem.", "error"));
+  });
 }
 
 function salvarVendasNaNuvem() {
-  const dados = vendas.map(v => [v.data, v.aroma, v.peso, v.quantidade, v.valorTotal]);
+  const dados = vendas.map(v => [v.data, v.aroma, v.quantidade, v.valorTotal]);
   fetch(webAppURL + "?tipo=Vendas", {
     method: "POST",
     body: JSON.stringify(dados)
-  }).then(res => {
-    if (!res.ok) throw new Error("Erro ao salvar vendas");
-  }).catch(() => mostrarNotificacao("Erro ao salvar vendas na nuvem.", "error"));
+  });
 }
 
 function carregarEstoqueDaNuvem() {
-  const syncStatus = document.getElementById("syncStatus");
-  syncStatus.textContent = "Sincronizando estoque...";
-  syncStatus.className = "fade-in";
-
   fetch(webAppURL + "?tipo=Estoque")
-    .then(res => {
-      if (!res.ok) throw new Error("Erro na resposta da planilha de estoque");
-      return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
-      if (!Array.isArray(data) || data.length === 0) {
-        mostrarNotificacao("Nenhum estoque encontrado na nuvem.", "error");
-        return;
-      }
       estoque = {};
-      data.forEach(([aroma, peso, local, qtd]) => {
-        const chave = `${aroma}_${peso}_${local}`;
+      estoque._locais = {};
+      data.forEach(([aroma, local, qtd]) => {
+        if (!aroma || !local || qtd === "" || qtd === null || qtd === undefined || isNaN(parseInt(qtd))) return;
+        const chave = `${aroma}_${local}`;
         estoque[chave] = parseInt(qtd);
+        estoque._locais[chave] = local;
       });
       localStorage.setItem("estoqueVelas", JSON.stringify(estoque));
       atualizarTabela();
-      mostrarNotificacao("Estoque sincronizado com sucesso.");
-    })
-    .catch(() => mostrarNotificacao("Erro ao carregar estoque da nuvem.", "error"));
-}
-
-function carregarVendasDaNuvem() {
-  const syncStatus = document.getElementById("syncStatus");
-  syncStatus.textContent = "Sincronizando vendas...";
-  syncStatus.className = "fade-in";
-
-  fetch(webAppURL + "?tipo=Vendas")
-    .then(res => {
-      if (!res.ok) throw new Error("Erro na resposta da planilha");
-      return res.json();
-    })
-    .then(data => {
-      if (!Array.isArray(data) || data.length === 0) {
-        mostrarNotificacao("Nenhuma venda encontrada na nuvem.", "error");
-        return;
-      }
-
-      vendas = data.map(([data, aroma, peso, quantidade, valorTotal]) => ({
-        data,
-        aroma,
-        peso,
-        quantidade: parseInt(quantidade),
-        valorTotal: parseFloat(valorTotal)
-      }));
-
-      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
-      atualizarVendas();
-      mostrarNotificacao("Vendas sincronizadas com sucesso.");
-    })
-    .catch(() => {
-      mostrarNotificacao("Erro ao carregar vendas da nuvem.", "error");
     });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("registrarBtn").addEventListener("click", registrarVenda);
-  document.getElementById("adicionarBtn").addEventListener("click", () => alterarEstoque(true));
-  document.getElementById("removerBtn").addEventListener("click", () => alterarEstoque(false));
-  document.getElementById("zerarEstoqueBtn").addEventListener("click", zerarEstoque);
-  document.getElementById("zerarVendasBtn").addEventListener("click", zerarVendas);
-
-  carregarEstoqueDaNuvem();
-  carregarVendasDaNuvem();
-});
-
-window.addEventListener("focus", () => {
-  carregarEstoqueDaNuvem();
-  carregarVendasDaNuvem();
-});
-
-setInterval(() => {
-  carregarEstoqueDaNuvem();
-  carregarVendasDaNuvem();
-}, 15000);
-
-function mostrarNotificacao(texto, tipo = 'success') {
-  const div = document.createElement('div');
-  div.textContent = texto;
-  div.className = `fade-in ${tipo}`;
-  div.style.position = 'fixed';
-  div.style.bottom = '20px';
-  div.style.left = '50%';
-  div.style.transform = 'translateX(-50%)';
-  div.style.padding = '10px 20px';
-  div.style.borderRadius = '8px';
-  div.style.background = tipo === 'success' ? '#dff0d8' : '#f8d7da';
-  div.style.color = tipo === 'success' ? '#3c763d' : '#842029';
-  div.style.boxShadow = '0 0 10px rgba(0,0,0,0.2)';
-  document.body.appendChild(div);
-  setTimeout(() => div.remove(), 4000);
+function carregarVendasDaNuvem() {
+  fetch(webAppURL + "?tipo=Vendas")
+    .then(res => res.json())
+    .then(data => {
+      vendas = data.map(([data, aroma, quantidade, valorTotal]) => ({
+        data, aroma, quantidade: parseInt(quantidade), valorTotal: parseFloat(valorTotal)
+      }));
+      localStorage.setItem("vendasVelas", JSON.stringify(vendas));
+      atualizarVendas();
+    });
 }
-</script>
 
-</html>
+// Inicialização
+atualizarTabela();
+atualizarVendas();
+carregarEstoqueDaNuvem();
+carregarVendasDaNuvem();
+
+// Salvamento automático a cada 15 minutos
+setInterval(() => {
+  salvarEstoqueNaNuvem();
+  salvarVendasNaNuvem();
+}, 900000);
+</script>
